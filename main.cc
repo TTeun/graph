@@ -32,7 +32,27 @@ float evaluateQueue(queue<Token> *q){
   stack<float> *stck = new stack<float>;
 
   Token current;
-  float (*f)(float a, float b);
+  typedef float (*f_bin)(float a, float b);
+  static unordered_map<string, f_bin> bin_maps =
+    {
+      {"+", add},
+      {"-", sub},
+      {"*", mul},
+      {"/", divide},
+      {"^", pow}
+    };
+  f_bin binary_op;
+
+  typedef float (*f_un)(float a);
+  static unordered_map<string, f_un> un_maps =
+    {
+      {"sin", sin},
+      {"cos", cos},
+      {"tan", tan},
+      {"exp", exp}
+    };
+  f_un unary_op;
+
   float a, b;
   while (not q->empty()){
     current = q->front();
@@ -43,23 +63,20 @@ float evaluateQueue(queue<Token> *q){
     if (current.type == TOKEN_TYPE::NUM)
       stck->push(stof(current.value));
 
-    if (current.type == TOKEN_TYPE::OP){
-      if (current.value == string("+"))
-        f = add;
-      else if (current.value == string("-"))
-        f = sub;
-      else if (current.value == string("*"))
-        f = mul;
-      else if (current.value == string("/"))
-        f = divide;
-      else if (current.value == string("sin"))
-        f = sinf;
-
+    if (current.type == TOKEN_TYPE::BINARY_OP){
+      binary_op = bin_maps[current.value];
       b = stck->top();
       stck->pop();
       a = stck->top();
       stck->pop();
-      stck->push(f(a,b));
+      stck->push(binary_op(a,b));
+    }
+    if (current.type == TOKEN_TYPE::UNARY_OP){
+      unary_op = un_maps[current.value];
+
+      a = stck->top();
+      stck->pop();
+      stck->push(unary_op(a));
     }
   }
 
@@ -80,6 +97,7 @@ int main(){
   queue<Token> *q;
   q = Parser::parse_input(&test);
   if (q){
+    // printQueue(q);
     float f = evaluateQueue(q);
     cout << f << '\n';
     delete q;

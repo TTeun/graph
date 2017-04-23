@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-enum TOKEN_TYPE{
+enum class TOKEN_TYPE{
   NUM,
   VAR,
   UNARY_OP,
