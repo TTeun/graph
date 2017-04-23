@@ -19,15 +19,15 @@ struct OpInfo{
   char ass;
 };
 
-bool isNumeric(char a){
+inline bool isNumeric(char a){
   return ( (a >= '0') && (a <= '9') ) || (a == '.');
 }
 
-bool isLetter(char a){
+inline bool isLetter(char a){
   return (a >= 'a') && (a <= 'z');
 }
 
-bool isSimpleOP(char a){
+inline bool isSimpleOP(char a){
   return (a == '+') ||
          (a == '-') ||
          (a == '*') ||
@@ -35,11 +35,11 @@ bool isSimpleOP(char a){
          (a == '^');
 }
 
-bool isOpenBracket(char a){
+inline bool isOpenBracket(char a){
   return (a == '(');
 }
 
-bool isCloseBracket(char a){
+inline bool isCloseBracket(char a){
   return (a == ')');
 }
 
@@ -56,24 +56,29 @@ TOKEN_TYPE getTokenType(string *str){
     return TOKEN_TYPE::VAR;
 }
 
-bool is_unary_minus(Parser::MODE last_mode){
+inline bool is_unary_minus(Parser::MODE last_mode){
   return (last_mode != Parser::MODE::NUMERIC)      &&
-         (last_mode != Parser::MODE::LETTER) &&
+         (last_mode != Parser::MODE::LETTER)       &&
          (last_mode != Parser::MODE::CLOSE_BRACKET);
 }
 
 Parser::MODE Parser::getMode(char a, Parser::MODE last_mode){
   return
-    (a == '-') && ( is_unary_minus(last_mode) )  ? Parser::MODE::NUMERIC       :
-    isNumeric(a)                                 ? Parser::MODE::NUMERIC       :
-    isLetter(a)                                  ? Parser::MODE::LETTER        :
-    isSimpleOP(a)                                ? Parser::MODE::BINARY_OPERATOR      :
-    isOpenBracket(a)                             ? Parser::MODE::OPEN_BRACKET  :
-    isCloseBracket(a)                            ? Parser::MODE::CLOSE_BRACKET :
-    Parser::MODE::ERROR;
+  (a == '-') && ( is_unary_minus(last_mode) ) ? Parser::MODE::NUMERIC         :
+  isNumeric(a)                                ? Parser::MODE::NUMERIC         :
+  isLetter(a)                                 ? Parser::MODE::LETTER          :
+  isSimpleOP(a)                               ? Parser::MODE::BINARY_OPERATOR :
+  isOpenBracket(a)                            ? Parser::MODE::OPEN_BRACKET    :
+  isCloseBracket(a)                           ? Parser::MODE::CLOSE_BRACKET   :
+  Parser::MODE::ERROR;
 }
 
-bool Parser::get_next_token(string *input, size_t &str_position,Parser::MODE &mode, Token &token){
+bool Parser::get_next_token(
+                             string *input,
+                             size_t &str_position,
+                             Parser::MODE &mode,
+                             Token &token
+                          ){
   Parser::MODE last_mode = mode;
   mode = getMode(input->at(str_position), last_mode);
 
@@ -84,7 +89,12 @@ bool Parser::get_next_token(string *input, size_t &str_position,Parser::MODE &mo
 
   size_t offset;
   token = Token();
-  if (mode == Parser::MODE::BINARY_OPERATOR || mode == Parser::MODE::UNARY_OPERATOR || mode == Parser::MODE::OPEN_BRACKET ||  mode == Parser::MODE::CLOSE_BRACKET){
+  if (
+      mode == Parser::MODE::BINARY_OPERATOR ||
+      mode == Parser::MODE::UNARY_OPERATOR  ||
+      mode == Parser::MODE::OPEN_BRACKET    ||
+      mode == Parser::MODE::CLOSE_BRACKET
+    ){
     token.value  = input->substr(str_position, 1);
     token.type = mode == Parser::MODE::BINARY_OPERATOR ? TOKEN_TYPE::BINARY_OP :
                  mode == Parser::MODE::UNARY_OPERATOR  ? TOKEN_TYPE::UNARY_OP :
@@ -95,18 +105,25 @@ bool Parser::get_next_token(string *input, size_t &str_position,Parser::MODE &mo
   if (mode == Parser::MODE::NUMERIC || mode == Parser::MODE::LETTER){
     bool (*f)(char a) = mode == Parser::MODE::NUMERIC ? isNumeric : isLetter;
     offset = 1;
-    while (str_position + offset < input->size() && f(input->at(str_position + offset)))
+    while (
+          str_position + offset < input->size() &&
+          f(input->at(str_position + offset))
+        )
       ++offset;
 
     token.value = input->substr(str_position, offset);
-    if (mode == Parser::MODE::NUMERIC && (std::count(token.value.begin(), token.value.end(), '.') > 1)){
+    if (
+        mode == Parser::MODE::NUMERIC &&
+        (std::count(token.value.begin(), token.value.end(), '.') > 1)
+      ){
       mode = Parser::MODE::ERROR;
       cout << "Too many decimal points ('.')" << '\n';
       return false;
     }
     str_position += offset;
 
-    token.type = mode == Parser::MODE::NUMERIC ? TOKEN_TYPE::NUM : getTokenType(&(token.value));
+    token.type = mode == Parser::MODE::NUMERIC ? TOKEN_TYPE::NUM :
+                        getTokenType(&(token.value));
   }
   return true;
 }
@@ -148,13 +165,12 @@ queue<Token> *Parser::to_queue(vector<Token> &token_list){
       {"exp", OpInfo(5, "R")}
     };
 
-    // //////// SHUNTING YARD /////////
+  ////////// SHUNTING YARD /////////
   queue<Token> in_queue;
   queue<Token> *out_queue = new queue<Token>;
   stack<Token> op_stack;
   OpInfo op1, op2;
   for (Token tk : token_list){
-
     switch (tk.type) {
       case TOKEN_TYPE::NUM:
         out_queue->push(tk);
