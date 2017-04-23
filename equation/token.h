@@ -47,22 +47,4 @@ struct Token{
   }
 };
 
-struct TokenTree{
-  Token token;
-  TokenTree *left = nullptr;
-  TokenTree *right = nullptr;
-
-  void printTree(){
-    if (left)
-      left->printTree();
-
-    std::cout << token.value << " ";
-
-    if (right)
-      right->printTree();
-  }
-};
-
-
-
 #endif
