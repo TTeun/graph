@@ -4,16 +4,16 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <unordered_map>
 #include <cmath>
 
 #include "../token.h"
-#include "../parser/parser.h"
 
 class Expression {
 public:
   Expression();
-  Expression(std::string *input);
+  Expression(std::queue<Token> *q, std::vector<std::string> *vrbls);
   ~Expression();
 
 private:
@@ -34,9 +34,10 @@ private:
 
   static double constexpr PI = 3.141592653589793;
 
+  std::vector<std::string> *variables;
 public:
   double evaluateQueue();
-  std::vector<std::string> *variables();
+  void printVariables();
   void printQueue();
 };
 

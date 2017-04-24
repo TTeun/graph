@@ -8,8 +8,9 @@ Expression::Expression()
   : token_queue(new queue<Token>)
 {}
 
-Expression::Expression(string *input)
-  : token_queue(Parser::parse_input(input))
+Expression::Expression(queue<Token> *q, vector<string> *vrbls)
+  : token_queue(q),
+    variables(vrbls)
 {}
 
 Expression::~Expression(){
@@ -36,8 +37,9 @@ Expression::map_un Expression::un_maps =
 
 constexpr double Expression::PI;
 
-vector<string> *variables(){
-
+void Expression::printVariables(){
+  for (auto v : *variables)
+    cout << v << '\n';
 }
 
 double Expression::evaluateQueue(){

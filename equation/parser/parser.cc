@@ -131,7 +131,7 @@ bool Parser::get_next_token(
   return true;
 }
 
-queue<Token> *Parser::parse_input(string *input){
+Expression *Parser::parse_input(string *input){
   // Remove all spaces
   input->erase(remove_if(input->begin(), input->end(), [](char a){return std::isspace(a);}), input->end());
 
@@ -154,7 +154,7 @@ queue<Token> *Parser::parse_input(string *input){
   return to_queue(tokens);
 }
 
-queue<Token> *Parser::to_queue(vector<Token> &token_list){
+Expression *Parser::to_queue(vector<Token> &token_list){
   static unordered_map<string, OpInfo> info =
     {
       {"+", OpInfo(2, "L")},
@@ -172,6 +172,8 @@ queue<Token> *Parser::to_queue(vector<Token> &token_list){
   queue<Token> in_queue;
   queue<Token> *out_queue = new queue<Token>;
   stack<Token> op_stack;
+  vector<string> *variables = new vector<string>;
+
   OpInfo op1, op2;
   for (Token tk : token_list){
     switch (tk.type) {
@@ -180,6 +182,7 @@ queue<Token> *Parser::to_queue(vector<Token> &token_list){
         break;
       case TOKEN_TYPE::VAR:
         out_queue->push(tk);
+        variables->push_back(tk.value);
         break;
       case TOKEN_TYPE::UNARY_OP:
         op1 = info[tk.value];
@@ -243,6 +246,6 @@ queue<Token> *Parser::to_queue(vector<Token> &token_list){
     out_queue->push(op_stack.top());
     op_stack.pop();
   }
-
-  return out_queue;
+  Expression *e = new Expression(out_queue, variables);
+  return e;
 }

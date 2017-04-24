@@ -1,4 +1,5 @@
 #include "equation/expression/expression.h"
+#include "equation/parser/parser.h"
 #include <string>
 #include <queue>
 #include <stack>
@@ -9,9 +10,12 @@ using namespace std;
 int main(){
   string test;
   getline(cin, test);
-  Expression *exp = new Expression(&test);
-  double f = exp->evaluateQueue();
-  cout << f << '\n';
-  delete exp;
+
+  Expression *e(Parser::parse_input(&test));
+
+
+  e->printVariables();
+  // double f = e->evaluateQueue();
+  // cout << f << '\n';
 
 }
