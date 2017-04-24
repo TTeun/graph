@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <cmath>
 
@@ -14,9 +15,6 @@ public:
   Expression();
   Expression(std::string *input);
   ~Expression();
-
-  double evaluateQueue();
-  void printQueue();
 
 private:
   std::queue<Token> *token_queue;
@@ -35,6 +33,11 @@ private:
   static std::unordered_map<std::string, f_un> un_maps;
 
   static double constexpr PI = 3.141592653589793;
+
+public:
+  double evaluateQueue();
+  std::vector<std::string> *variables();
+  void printQueue();
 };
 
 inline double Expression::add(double a, double b){
@@ -54,6 +57,5 @@ inline double Expression::divide(double a, double b){
     std::cout << "Division by zero\n";
   return a / b;
 }
-
 
 #endif

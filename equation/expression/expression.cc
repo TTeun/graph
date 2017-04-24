@@ -36,6 +36,10 @@ Expression::map_un Expression::un_maps =
 
 constexpr double Expression::PI;
 
+vector<string> *variables(){
+
+}
+
 double Expression::evaluateQueue(){
 
   stack<double> *stck = new stack<double>;
