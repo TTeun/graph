@@ -12,5 +12,6 @@ int main(){
   Expression *exp = new Expression(&test);
   double f = exp->evaluateQueue();
   cout << f << '\n';
+  delete exp;
 
 }

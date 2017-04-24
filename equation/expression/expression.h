@@ -33,6 +33,8 @@ private:
 
   static std::unordered_map<std::string, f_bin> bin_maps;
   static std::unordered_map<std::string, f_un> un_maps;
+
+  static double constexpr PI = 3.141592653589793;
 };
 
 inline double Expression::add(double a, double b){

@@ -14,6 +14,7 @@ Expression::Expression(string *input)
 
 Expression::~Expression(){
   delete token_queue;
+  cout << "Expression destructor \n";
 }
 
 Expression::map_bin Expression::bin_maps =
@@ -24,6 +25,7 @@ Expression::map_bin Expression::bin_maps =
     {"/", divide},
     {"^", pow}
   };
+
 Expression::map_un Expression::un_maps =
   {
     {"sin", sin},
@@ -32,8 +34,9 @@ Expression::map_un Expression::un_maps =
     {"exp", exp}
   };
 
+constexpr double Expression::PI;
+
 double Expression::evaluateQueue(){
-  const double PI = 3.141592653589793;
 
   stack<double> *stck = new stack<double>;
 
@@ -66,7 +69,6 @@ double Expression::evaluateQueue(){
     }
     if (current.type == TOKEN_TYPE::UNARY_OP){
       unary_op = un_maps[current.value];
-
       a = stck->top();
       stck->pop();
       stck->push(unary_op(a));
