@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <stack>
 #include <iostream>
 #include <unordered_map>
 #include <cmath>
@@ -29,6 +30,8 @@ private:
   // std::unordered_map<std::string, double> var_map;
 
   static double constexpr PI = 3.141592653589793;
+  double toNum(std::string &str);
+  bool binToNum(std::string &str, std::stack<double> *stck);
 
   std::vector<std::string> *variables;
   std::string *m_state;
@@ -37,15 +40,9 @@ private:
 
 public:
   void setState(std::string && st);
-  std::string *state(){
-    return m_state;
-  }
-  bool success(){
-    return m_success;
-  }
-  double value(){
-    return m_value;
-  }
+  std::string *state();
+  bool success();
+  double value();
   void evaluateQueue();
   void printVariables();
   void printQueue();

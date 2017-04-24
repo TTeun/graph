@@ -119,10 +119,10 @@ bool Parser::get_next_token(
     token.value = input->substr(str_position, offset);
     if (
         mode == Parser::MODE::NUMERIC &&
-        (std::count(token.value.begin(), token.value.end(), '.') > 1)
+        ( (std::count(token.value.begin(), token.value.end(), '.') > 1) || token.value == string("-"))
       ){
       mode = Parser::MODE::ERROR;
-      cout << "Too many decimal points ('.')" << '\n';
+      cout << "Syntax error" << '\n';
       return false;
     }
     str_position += offset;
