@@ -75,9 +75,10 @@ TOKEN_TYPE getTokenType(string *str){
 }
 
 inline bool is_unary_minus(char a, Parser::MODE last_mode){
-  return (a == '-')                                  &&
-         ( (last_mode == Parser::MODE::START)        ||
-           (last_mode == Parser::MODE::CLOSE_BRACKET) );
+  return (a == '-')                                   &&
+         ( (last_mode == Parser::MODE::START)         ||
+           (last_mode == Parser::MODE::CLOSE_BRACKET) ||
+           (last_mode == Parser::MODE::OPEN_BRACKET) );
 }
 
 Parser::MODE Parser::getMode(char a, Parser::MODE last_mode){
@@ -153,12 +154,12 @@ bool singleLetterSymbol(
   return true;
 }
 
-bool Parser::get_next_token(
-                             string *input,
-                             size_t &str_position,
-                             Parser::MODE &mode,
-                             Token &token
-                          ){
+bool isFinalWhiteSpace(
+                      string *input,
+                      size_t &str_position,
+                      Parser::MODE &mode,
+                      Token &token
+                    ){
   while (isspace((*input)[str_position])) // Skip first whitespace
     ++str_position;
 
@@ -167,6 +168,18 @@ bool Parser::get_next_token(
     token.type = TOKEN_TYPE::NONE;
     return true;
   }
+  return false;
+}
+
+bool Parser::get_next_token(
+                             string *input,
+                             size_t &str_position,
+                             Parser::MODE &mode,
+                             Token &token
+                          ){
+
+  if (isFinalWhiteSpace(input, str_position, mode, token)) // is there just white space left?
+    return true;
 
   Parser::MODE last_mode = mode;
   mode = getMode(input->at(str_position), last_mode); // See what we will now read
@@ -201,7 +214,6 @@ bool Parser::get_next_token(
     default:
       return true;
   }
-
 }
 
 Expression *Parser::parse_input(string *input){

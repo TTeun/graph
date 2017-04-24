@@ -29,7 +29,7 @@ Expression::map_bin Expression::bin_maps =
     {"+", [](double a, double b){return a + b;}},
     {"-", [](double a, double b){return a - b;}},
     {"*", [](double a, double b){return a * b;}},
-    {"/", [](double a, double b){return a / b;}},
+    {"/", [](double a, double b){return b == 0 ? numeric_limits<double>::quiet_NaN() : a / b;}},
     {"^", pow}
   };
 
@@ -110,7 +110,7 @@ void Expression::evaluateQueue()
   if (paren_mismatch)
     setState(string("Mismatched parenthesis\n"));
 
-  if (stck->size() != 1 || syntax_error)
+  if (stck->size() != 1 || syntax_error) // Stack should contain just one number now
     setState("Syntax error\n");
 
   else
