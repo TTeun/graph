@@ -31,8 +31,22 @@ private:
   static double constexpr PI = 3.141592653589793;
 
   std::vector<std::string> *variables;
+  std::string *m_state;
+  bool m_success = true;
+  double m_value;
+
 public:
-  double evaluateQueue();
+  void setState(std::string && st);
+  std::string *state(){
+    return m_state;
+  }
+  bool success(){
+    return m_success;
+  }
+  double value(){
+    return m_value;
+  }
+  void evaluateQueue();
   void printVariables();
   void printQueue();
 };

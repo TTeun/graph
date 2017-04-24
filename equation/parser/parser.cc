@@ -82,11 +82,13 @@ bool Parser::get_next_token(
                              Parser::MODE &mode,
                              Token &token
                           ){
+  while (isspace((*input)[str_position]))
+    ++str_position;
+
   Parser::MODE last_mode = mode;
   mode = getMode(input->at(str_position), last_mode);
 
   if (mode == Parser::MODE::ERROR){
-    cout << "Parser error after: \n" << input->substr(0, str_position) << '\n';
     return false;
   }
 
@@ -133,25 +135,30 @@ bool Parser::get_next_token(
 
 Expression *Parser::parse_input(string *input){
   // Remove all spaces
-  input->erase(remove_if(input->begin(), input->end(), [](char a){return std::isspace(a);}), input->end());
+  // input->erase(remove_if(input->begin(), input->end(), [](char a){return std::isspace(a);}), input->end());
 
   vector<Token> tokens;
   Token token;
   size_t str_position = 0;
   MODE mode = Parser::MODE::START;
-
+  bool parser_error = false;
   while (str_position < input->size()){
 
     if (get_next_token(input, str_position, mode, token)){
       // token.printToken();
       tokens.push_back(token);
     }
-    else
-      return nullptr;
-
+    else{
+      parser_error = true;
+      break;
+    }
   }
-  cout << "\n\n";
-  return to_queue(tokens);
+  if (not parser_error)
+    return to_queue(tokens);
+
+  Expression *e = new Expression;
+  e->setState( "Parser error after: \n" + input->substr(0, str_position) + '\n');
+  return e;
 }
 
 Expression *Parser::to_queue(vector<Token> &token_list){
@@ -173,6 +180,8 @@ Expression *Parser::to_queue(vector<Token> &token_list){
   queue<Token> *out_queue = new queue<Token>;
   stack<Token> op_stack;
   vector<string> *variables = new vector<string>;
+
+  bool paren_mismatch = false;
 
   OpInfo op1, op2;
   for (Token tk : token_list){
@@ -225,7 +234,7 @@ Expression *Parser::to_queue(vector<Token> &token_list){
             out_queue->push(op_stack.top());
             op_stack.pop();
             if (op_stack.empty()){
-              cout << "Mismatched parenthesis \n";
+              paren_mismatch = true;
               break;
             }
           }
@@ -240,12 +249,15 @@ Expression *Parser::to_queue(vector<Token> &token_list){
   }
   while (not op_stack.empty()){
     if (op_stack.top().type == TOKEN_TYPE::BRA){
-      cout << "Mismatched parenthesis \n";
+      paren_mismatch = true;
       break;
     }
     out_queue->push(op_stack.top());
     op_stack.pop();
   }
   Expression *e = new Expression(out_queue, variables);
+  if (paren_mismatch){
+    e->setState(string("Mismatched parenthesis\n"));
+  }
   return e;
 }

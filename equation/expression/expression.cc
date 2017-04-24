@@ -1,21 +1,29 @@
 #include "expression.h"
 #include <stack>
+#include <limits> // NaN
 #include <unordered_map>
 
 using namespace std;
 
 Expression::Expression()
-  : token_queue(new queue<Token>)
-{}
+  : token_queue(new queue<Token>),
+    variables(new vector<string>),
+    m_state(new string())
+{
+}
 
 Expression::Expression(queue<Token> *q, vector<string> *vrbls)
   : token_queue(q),
-    variables(vrbls)
+    variables(vrbls),
+    m_state(new string())
 {}
 
-Expression::~Expression(){
+Expression::~Expression()
+{
   delete token_queue;
-  cout << "Expression destructor \n";
+  delete variables;
+  delete m_state;
+  // cout << "Expression destructor \n";
 }
 
 Expression::map_bin Expression::bin_maps =
@@ -37,12 +45,16 @@ Expression::map_un Expression::un_maps =
 
 constexpr double Expression::PI;
 
-void Expression::printVariables(){
+void Expression::printVariables()
+{
   for (auto v : *variables)
     cout << v << '\n';
 }
 
-double Expression::evaluateQueue(){
+void Expression::evaluateQueue()
+{
+  if (not m_success)
+    return;
 
   stack<double> *stck = new stack<double>;
 
@@ -52,20 +64,27 @@ double Expression::evaluateQueue(){
   f_un unary_op;
 
   double a, b;
-  while (not token_queue->empty()){
+  bool paren_mismatch = false;
+  while (not token_queue->empty())
+  {
     current = token_queue->front();
     token_queue->pop();
     if (current.type == TOKEN_TYPE::BRA)
-      cout << "Mismatched parenthesis\n";
+    {
+      paren_mismatch = true;
+      break;
+    }
 
-    if (current.type == TOKEN_TYPE::NUM){
+    if (current.type == TOKEN_TYPE::NUM)
+    {
       if (current.value == string("pi"))
         stck->push(PI);
       else
         stck->push(stod(current.value));
     }
 
-    if (current.type == TOKEN_TYPE::BINARY_OP){
+    if (current.type == TOKEN_TYPE::BINARY_OP)
+    {
       binary_op = bin_maps[current.value];
       b = stck->top();
       stck->pop();
@@ -73,22 +92,40 @@ double Expression::evaluateQueue(){
       stck->pop();
       stck->push(binary_op(a,b));
     }
-    if (current.type == TOKEN_TYPE::UNARY_OP){
+    if (current.type == TOKEN_TYPE::UNARY_OP)
+    {
       unary_op = un_maps[current.value];
       a = stck->top();
       stck->pop();
       stck->push(unary_op(a));
     }
   }
-  double result = stck->top();
+
+  if (paren_mismatch)
+    setState(string("Mismatched parenthesis\n"));
+
+  if (stck->size() != 1)
+  {
+    setState("Syntax error\n");
+    m_value = numeric_limits<double>::quiet_NaN();
+  }
+  else
+    m_value = stck->top();
   delete stck;
-  return result;
 }
 
-void Expression::printQueue(){
-  while (not token_queue->empty()){
+void Expression::printQueue()
+{
+  while (not token_queue->empty())
+  {
     token_queue->front().printToken();
     token_queue->pop();
   }
   cout << "\n";
+}
+
+void Expression::setState(string && st)
+{
+  *m_state = st;
+  m_success = false;
 }
