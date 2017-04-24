@@ -140,7 +140,7 @@ queue<Token> *Parser::parse_input(string *input){
   while (str_position < input->size()){
 
     if (get_next_token(input, str_position, mode, token)){
-      token.printToken();
+      // token.printToken();
       tokens.push_back(token);
     }
     else

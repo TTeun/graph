@@ -24,10 +24,6 @@ inline float divide(float a, float b){
   return a / b;
 }
 
-inline float sinf(float a){
-  return sin(a);
-}
-
 float evaluateQueue(queue<Token> *q){
   stack<float> *stck = new stack<float>;
 

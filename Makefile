@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++11 -Wall -Werror
+CFLAGS = -std=c++11 -Wall -pedantic -Werror -O3
 
 
 all: graph
