@@ -6,29 +6,31 @@
 
 using namespace std;
 
-inline float add(float a, float b){
+inline double add(double a, double b){
   return a + b;
 }
 
-inline float sub(float a, float b){
+inline double sub(double a, double b){
   return a - b;
 }
 
-inline float mul(float a, float b){
+inline double mul(double a, double b){
   return a * b;
 }
 
-inline float divide(float a, float b){
+inline double divide(double a, double b){
   if (b == 0.0f)
     cout << "Division by zero\n";
   return a / b;
 }
 
-float evaluateQueue(queue<Token> *q){
-  stack<float> *stck = new stack<float>;
+double evaluateQueue(queue<Token> *q){
+  const double PI = 3.141592653589793;
+
+  stack<double> *stck = new stack<double>;
 
   Token current;
-  typedef float (*f_bin)(float a, float b);
+  typedef double (*f_bin)(double a, double b);
   static unordered_map<string, f_bin> bin_maps =
     {
       {"+", add},
@@ -39,7 +41,7 @@ float evaluateQueue(queue<Token> *q){
     };
   f_bin binary_op;
 
-  typedef float (*f_un)(float a);
+  typedef double (*f_un)(double a);
   static unordered_map<string, f_un> un_maps =
     {
       {"sin", sin},
@@ -49,15 +51,19 @@ float evaluateQueue(queue<Token> *q){
     };
   f_un unary_op;
 
-  float a, b;
+  double a, b;
   while (not q->empty()){
     current = q->front();
     q->pop();
     if (current.type == TOKEN_TYPE::BRA)
       cout << "Mismatched parenthesis\n";
 
-    if (current.type == TOKEN_TYPE::NUM)
-      stck->push(stof(current.value));
+    if (current.type == TOKEN_TYPE::NUM){
+      if (current.value == string("pi"))
+        stck->push(PI);
+      else
+        stck->push(stod(current.value));
+    }
 
     if (current.type == TOKEN_TYPE::BINARY_OP){
       binary_op = bin_maps[current.value];
@@ -75,7 +81,7 @@ float evaluateQueue(queue<Token> *q){
       stck->push(unary_op(a));
     }
   }
-  float result = stck->top();
+  double result = stck->top();
   delete stck;
   return result;
 }
@@ -95,7 +101,7 @@ int main(){
   q = Parser::parse_input(&test);
   if (q){
     // printQueue(q);
-    float f = evaluateQueue(q);
+    double f = evaluateQueue(q);
     cout << f << '\n';
     delete q;
   }

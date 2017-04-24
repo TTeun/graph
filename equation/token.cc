@@ -1,32 +1,34 @@
 #include "token.h"
 #include <iostream>
 
+using namespace std;
+
 void Token::printToken(){
-  std::cout << "(";
+  cout << "(";
   switch (type) {
     case TOKEN_TYPE::NUM:
-      std::cout << "num: ";
+      cout << "num: ";
       break;
     case TOKEN_TYPE::VAR:
-      std::cout << "var ";
+      cout << "var ";
       break;
     case TOKEN_TYPE::UNARY_OP:
-      std::cout << "u_op: ";
+      cout << "u_op: ";
       break;
     case TOKEN_TYPE::BINARY_OP:
-      std::cout << "b_op: ";
+      cout << "b_op: ";
       break;
     case TOKEN_TYPE::BRA:
-      std::cout << "bra: ";
+      cout << "bra: ";
       break;
     case TOKEN_TYPE::NONE:
-      std::cout << "none ";
+      cout << "none ";
       break;
   }
-  std::cout << value;
-  std::cout << ")";
+  cout << value;
+  cout << ")";
 }
 
 void Token::printVal(){
-  std::cout << value << ' ';
+  cout << value << ' ';
 }

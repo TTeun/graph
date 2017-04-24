@@ -52,6 +52,9 @@ TOKEN_TYPE getTokenType(string *str){
   )
     return TOKEN_TYPE::UNARY_OP;
 
+  if (*str == string("pi"))
+    return TOKEN_TYPE::NUM;
+
   else
     return TOKEN_TYPE::VAR;
 }
