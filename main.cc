@@ -75,8 +75,9 @@ float evaluateQueue(queue<Token> *q){
       stck->push(unary_op(a));
     }
   }
-
-  return stck->top();
+  float result = stck->top();
+  delete stck;
+  return result;
 }
 
 void printQueue(queue<Token> *q){
