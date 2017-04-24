@@ -1,11 +1,10 @@
 CC = g++
 CFLAGS = -std=c++11 -Wall -pedantic -Werror -O3
 
-
 all: graph
 
 graph: main.o token.o parser.o expression.o
-		$(CC) $(CFLAGS) main.o token.o parser.o -o graph
+		$(CC) $(CFLAGS) main.o token.o parser.o expression.o -o graph
 
 main.o: main.cc
 		$(CC) $(CFLAGS) -c main.cc
