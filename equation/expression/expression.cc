@@ -20,10 +20,10 @@ Expression::~Expression(){
 
 Expression::map_bin Expression::bin_maps =
   {
-    {"+", add},
-    {"-", sub},
-    {"*", mul},
-    {"/", divide},
+    {"+", [](double a, double b){return a + b;}},
+    {"-", [](double a, double b){return a - b;}},
+    {"*", [](double a, double b){return a * b;}},
+    {"/", [](double a, double b){return a / b;}},
     {"^", pow}
   };
 

@@ -15,7 +15,7 @@ int main(){
 
 
   e->printVariables();
-  // double f = e->evaluateQueue();
-  // cout << f << '\n';
+  double f = e->evaluateQueue();
+  cout << f << '\n';
 
 }
