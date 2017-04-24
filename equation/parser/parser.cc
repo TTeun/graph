@@ -75,10 +75,9 @@ TOKEN_TYPE getTokenType(string *str){
 }
 
 inline bool is_unary_minus(char a, Parser::MODE last_mode){
-  return (a == '-')                                &&
-         (last_mode != Parser::MODE::NUMERIC)      &&
-         (last_mode != Parser::MODE::LETTER)       &&
-         (last_mode != Parser::MODE::CLOSE_BRACKET);
+  return (a == '-')                                  &&
+         ( (last_mode == Parser::MODE::START)        ||
+           (last_mode == Parser::MODE::CLOSE_BRACKET) );
 }
 
 Parser::MODE Parser::getMode(char a, Parser::MODE last_mode){
@@ -149,7 +148,7 @@ bool singleLetterSymbol(
 {
   token.value  = input->substr(str_position, 1);
   token.type = mode == Parser::MODE::BINARY_OPERATOR ? TOKEN_TYPE::BINARY_OP :
-               TOKEN_TYPE::BRA;
+                       TOKEN_TYPE::BRA;
   ++str_position;
   return true;
 }
@@ -160,7 +159,7 @@ bool Parser::get_next_token(
                              Parser::MODE &mode,
                              Token &token
                           ){
-  while (isspace((*input)[str_position]))
+  while (isspace((*input)[str_position])) // Skip first whitespace
     ++str_position;
 
   if (str_position == input->size())
@@ -202,7 +201,7 @@ bool Parser::get_next_token(
     default:
       return true;
   }
-  
+
 }
 
 Expression *Parser::parse_input(string *input){
@@ -214,12 +213,12 @@ Expression *Parser::parse_input(string *input){
   bool parser_error = false;
   while (str_position < input->size()){
 
-    if (get_next_token(input, str_position, mode, token)){
-      // token.printToken();
-      if (token.type != TOKEN_TYPE::NONE)
+    if (get_next_token(input, str_position, mode, token))
+    {
+      if (token.type != TOKEN_TYPE::NONE) // A NONE token may happen with excess white space
         tokens.push_back(token);
     }
-    else{
+    else {
       parser_error = true;
       break;
     }
@@ -231,6 +230,55 @@ Expression *Parser::parse_input(string *input){
   e->setState( "Parser error after: \n" + input->substr(0, str_position) + '\n');
   return e;
 }
+
+void handleOp(queue<Token> *out_queue, stack<Token> &op_stack, Token &tk, unordered_map<string, OpInfo> &info){
+  OpInfo op1, op2;
+
+  op1 = info[tk.value];
+  while (not op_stack.empty()){
+    op2 = info[op_stack.top().value];
+
+    if (  (op1.ass == 'L' && op1.pres <= op2.pres)
+        ||(op1.ass == 'R' && op1.pres < op2.pres) ){
+          out_queue->push(op_stack.top());
+          op_stack.pop();
+      }
+    else
+     break;
+  }
+  op_stack.push(tk);
+}
+
+bool handleBracket(queue<Token> *out_queue, stack<Token> &op_stack, Token &tk){
+  if (tk.value == string("("))
+    op_stack.push(tk);
+  else {
+    while (op_stack.top().value != string("(")){
+      out_queue->push(op_stack.top());
+      op_stack.pop();
+      if (op_stack.empty()){
+        return false; // Found Mismatched brackets
+      }
+    }
+    if (op_stack.top().value == string("(")){
+      op_stack.pop();
+    }
+  }
+  return true;
+}
+
+bool emptyQueue(queue<Token> *out_queue, stack<Token> &op_stack){
+
+  while (not op_stack.empty()){
+    if (op_stack.top().type == TOKEN_TYPE::BRA)
+      return false; // Found Mismatched brackets
+
+    out_queue->push(op_stack.top());
+    op_stack.pop();
+  }
+  return true;
+}
+
 
 Expression *Parser::to_queue(vector<Token> &token_list){
   static unordered_map<string, OpInfo> info =
@@ -261,75 +309,36 @@ Expression *Parser::to_queue(vector<Token> &token_list){
       case TOKEN_TYPE::NUM:
         out_queue->push(tk);
         break;
+
       case TOKEN_TYPE::VAR:
         out_queue->push(tk);
         variables->push_back(tk.value);
         break;
+
       case TOKEN_TYPE::UNARY_OP:
-        op1 = info[tk.value];
-        while (not op_stack.empty()){
-          op2 = info[op_stack.top().value];
-
-          if (  (op1.ass == 'L' && op1.pres <= op2.pres)
-              ||(op1.ass == 'R' && op1.pres < op2.pres) ){
-                out_queue->push(op_stack.top());
-                op_stack.pop();
-            }
-          else
-           break;
-        }
-        op_stack.push(tk);
-
+        handleOp(out_queue, op_stack, tk, info);
         break;
+
       case TOKEN_TYPE::BINARY_OP:
-        op1 = info[tk.value];
-        while (not op_stack.empty()){
-          op2 = info[op_stack.top().value];
-
-          if (  (op1.ass == 'L' && op1.pres <= op2.pres)
-              ||(op1.ass == 'R' && op1.pres < op2.pres) ){
-                out_queue->push(op_stack.top());
-                op_stack.pop();
-            }
-          else
-           break;
-        }
-        op_stack.push(tk);
-
+        handleOp(out_queue, op_stack, tk, info);
         break;
 
       case TOKEN_TYPE::BRA:
-        if (tk.value == string("("))
-          op_stack.push(tk);
-        else {
-          while (op_stack.top().value != string("(")){
-            out_queue->push(op_stack.top());
-            op_stack.pop();
-            if (op_stack.empty()){
-              paren_mismatch = true;
-              break;
-            }
-          }
-          if (op_stack.top().value == string("(")){
-            op_stack.pop();
-          }
-        }
+        paren_mismatch = not handleBracket(out_queue, op_stack, tk);
         break;
       case TOKEN_TYPE::NONE:
         break;
     }
-  }
-  while (not op_stack.empty()){
-    if (op_stack.top().type == TOKEN_TYPE::BRA){
-      paren_mismatch = true;
+
+    if (paren_mismatch)
       break;
-    }
-    out_queue->push(op_stack.top());
-    op_stack.pop();
   }
+
+  paren_mismatch = not emptyQueue(out_queue, op_stack);
+
   Expression *e = new Expression(out_queue, variables);
-  if (paren_mismatch){
+  if (paren_mismatch)
     e->setState(string("Mismatched parenthesis\n"));
-  }
+
   return e;
 }
