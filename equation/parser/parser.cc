@@ -20,19 +20,34 @@ struct OpInfo{
 };
 
 inline bool isNumeric(char a){
-  return ( (a >= '0') && (a <= '9') ) || (a == '.');
+  return  (a >= '0') && (a <= '9');
 }
 
 inline bool isLetter(char a){
   return (a >= 'a') && (a <= 'z');
 }
 
-inline bool isSimpleOP(char a){
-  return (a == '+') ||
-         (a == '-') ||
-         (a == '*') ||
-         (a == '/') ||
-         (a == '^');
+// NUMERIC,
+// LETTER,
+// UNARY_MINUS,
+// UNARY_OPERATOR,
+// BINARY_OPERATOR,
+// OPEN_BRACKET,
+// CLOSE_BRACKET,
+// ERROR,
+// START
+
+inline bool isSimpleOP(char a, Parser::MODE last_mode){
+  return
+        ( (last_mode != Parser::MODE::UNARY_MINUS)     &&
+          (last_mode != Parser::MODE::UNARY_OPERATOR)  &&
+          (last_mode != Parser::MODE::BINARY_OPERATOR) &&
+          (last_mode != Parser::MODE::START)  )
+    &&  ( (a == '+') ||
+          (a == '-') || // This is a binary minus if we reach here
+          (a == '*') ||
+          (a == '/') ||
+          (a == '^') );
 }
 
 inline bool isOpenBracket(char a){
@@ -59,21 +74,84 @@ TOKEN_TYPE getTokenType(string *str){
     return TOKEN_TYPE::VAR;
 }
 
-inline bool is_unary_minus(Parser::MODE last_mode){
-  return (last_mode != Parser::MODE::NUMERIC)      &&
+inline bool is_unary_minus(char a, Parser::MODE last_mode){
+  return (a == '-')                                &&
+         (last_mode != Parser::MODE::NUMERIC)      &&
          (last_mode != Parser::MODE::LETTER)       &&
          (last_mode != Parser::MODE::CLOSE_BRACKET);
 }
 
 Parser::MODE Parser::getMode(char a, Parser::MODE last_mode){
   return
-  (a == '-') && ( is_unary_minus(last_mode) ) ? Parser::MODE::NUMERIC         :
-  isNumeric(a)                                ? Parser::MODE::NUMERIC         :
-  isLetter(a)                                 ? Parser::MODE::LETTER          :
-  isSimpleOP(a)                               ? Parser::MODE::BINARY_OPERATOR :
-  isOpenBracket(a)                            ? Parser::MODE::OPEN_BRACKET    :
-  isCloseBracket(a)                           ? Parser::MODE::CLOSE_BRACKET   :
-  Parser::MODE::ERROR;
+    is_unary_minus(a, last_mode)  ? Parser::MODE::UNARY_MINUS  :
+    isNumeric(a)                  ? Parser::MODE::NUMERIC         :
+    isLetter(a)                   ? Parser::MODE::LETTER          :
+    isSimpleOP(a, last_mode)      ? Parser::MODE::BINARY_OPERATOR :
+    isOpenBracket(a)              ? Parser::MODE::OPEN_BRACKET    :
+    isCloseBracket(a)             ? Parser::MODE::CLOSE_BRACKET   :
+    Parser::MODE::ERROR;
+}
+
+bool readNum(
+              string *input,
+              size_t &str_position,
+              Parser::MODE &mode,
+              Token &token
+            )
+{
+  size_t offset = 1; // This will keep track of how many characters the number consists of
+  while (
+        str_position + offset < input->size() &&
+          ( isNumeric(input->at(str_position + offset))
+            || input->at(str_position + offset) == '.'  )
+      )
+    ++offset;
+
+  token.value = input->substr(str_position, offset);
+  if (count(token.value.begin(), token.value.end(), '.') > 1)
+    {
+    mode = Parser::MODE::ERROR;
+    cout << "Syntax error" << '\n';
+    return false;
+  }
+  str_position += offset;
+  token.type = TOKEN_TYPE::NUM;
+  return true;
+}
+
+bool readWord(
+                string *input,
+                size_t &str_position,
+                Parser::MODE &mode,
+                Token &token
+              )
+{
+  size_t offset = 1; // This will keep track of how many characters the number consists of
+  while (
+        str_position + offset < input->size() &&
+        isLetter(input->at(str_position + offset))
+      )
+    ++offset;
+
+  token.value = input->substr(str_position, offset);
+
+  str_position += offset;
+  token.type = getTokenType(&(token.value));
+  return true;
+}
+
+bool singleLetterSymbol(
+                          string *input,
+                          size_t &str_position,
+                          Parser::MODE &mode,
+                          Token &token
+                        )
+{
+  token.value  = input->substr(str_position, 1);
+  token.type = mode == Parser::MODE::BINARY_OPERATOR ? TOKEN_TYPE::BINARY_OP :
+               TOKEN_TYPE::BRA;
+  ++str_position;
+  return true;
 }
 
 bool Parser::get_next_token(
@@ -85,57 +163,49 @@ bool Parser::get_next_token(
   while (isspace((*input)[str_position]))
     ++str_position;
 
+  if (str_position == input->size())
+  { // All we did was remove excess white space. This is not incorrect though!
+    token.type = TOKEN_TYPE::NONE;
+    return true;
+  }
+
   Parser::MODE last_mode = mode;
-  mode = getMode(input->at(str_position), last_mode);
-
-  if (mode == Parser::MODE::ERROR){
-    return false;
-  }
-
-  size_t offset;
+  mode = getMode(input->at(str_position), last_mode); // See what we will now read
   token = Token();
-  if (
-      mode == Parser::MODE::BINARY_OPERATOR ||
-      mode == Parser::MODE::UNARY_OPERATOR  ||
-      mode == Parser::MODE::OPEN_BRACKET    ||
-      mode == Parser::MODE::CLOSE_BRACKET
-    ){
-    token.value  = input->substr(str_position, 1);
-    token.type = mode == Parser::MODE::BINARY_OPERATOR ? TOKEN_TYPE::BINARY_OP :
-                 mode == Parser::MODE::UNARY_OPERATOR  ? TOKEN_TYPE::UNARY_OP :
-                 TOKEN_TYPE::BRA;
-    ++str_position;
-  }
 
-  if (mode == Parser::MODE::NUMERIC || mode == Parser::MODE::LETTER){
-    bool (*f)(char a) = mode == Parser::MODE::NUMERIC ? isNumeric : isLetter;
-    offset = 1;
-    while (
-          str_position + offset < input->size() &&
-          f(input->at(str_position + offset))
-        )
-      ++offset;
-
-    token.value = input->substr(str_position, offset);
-    if (
-        mode == Parser::MODE::NUMERIC &&
-        ( (std::count(token.value.begin(), token.value.end(), '.') > 1) || token.value == string("-"))
-      ){
-      mode = Parser::MODE::ERROR;
-      cout << "Syntax error" << '\n';
+  switch (mode)
+  {
+    case Parser::MODE::ERROR:
       return false;
-    }
-    str_position += offset;
 
-    token.type = mode == Parser::MODE::NUMERIC ? TOKEN_TYPE::NUM :
-                        getTokenType(&(token.value));
+    case Parser::MODE::UNARY_MINUS:
+      token.type = TOKEN_TYPE::UNARY_OP;
+      token.value = string("-u"); // Special notation for unary minus
+      ++str_position;
+      return true;
+
+    case Parser::MODE::BINARY_OPERATOR:
+      return singleLetterSymbol(input, str_position, mode, token);
+
+    case Parser::MODE::OPEN_BRACKET:
+      return singleLetterSymbol(input, str_position, mode, token);
+
+    case Parser::MODE::CLOSE_BRACKET:
+      return singleLetterSymbol(input, str_position, mode, token);
+
+    case Parser::MODE::NUMERIC:
+      return readNum(input, str_position, mode, token);
+
+    case Parser::MODE::LETTER:
+      return readWord(input, str_position, mode, token);
+
+    default:
+      return true;
   }
-  return true;
+  
 }
 
 Expression *Parser::parse_input(string *input){
-  // Remove all spaces
-  // input->erase(remove_if(input->begin(), input->end(), [](char a){return std::isspace(a);}), input->end());
 
   vector<Token> tokens;
   Token token;
@@ -146,7 +216,8 @@ Expression *Parser::parse_input(string *input){
 
     if (get_next_token(input, str_position, mode, token)){
       // token.printToken();
-      tokens.push_back(token);
+      if (token.type != TOKEN_TYPE::NONE)
+        tokens.push_back(token);
     }
     else{
       parser_error = true;
@@ -172,7 +243,8 @@ Expression *Parser::to_queue(vector<Token> &token_list){
       {"sin", OpInfo(5, "R")},
       {"cos", OpInfo(5, "R")},
       {"tan", OpInfo(5, "R")},
-      {"exp", OpInfo(5, "R")}
+      {"exp", OpInfo(5, "R")},
+      {"-u", OpInfo(5, "R")}
     };
 
   ////////// SHUNTING YARD /////////

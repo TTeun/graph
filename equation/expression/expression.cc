@@ -38,7 +38,8 @@ Expression::map_un Expression::un_maps =
     {"sin", sin},
     {"cos", cos},
     {"tan", tan},
-    {"exp", exp}
+    {"exp", exp},
+    {"-u", [](double a){return -a;}}
   };
 
 constexpr double Expression::PI;

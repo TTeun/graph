@@ -17,6 +17,7 @@ public:
   enum MODE{
     NUMERIC,
     LETTER,
+    UNARY_MINUS,
     UNARY_OPERATOR,
     BINARY_OPERATOR,
     OPEN_BRACKET,
