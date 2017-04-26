@@ -1,10 +1,10 @@
 CC = g++
-CFLAGS = -std=c++11 -Wall -pedantic -Werror -O3
+CFLAGS = -std=c++11  -O3
 
 all: graph
 
-graph: main.o token.o parser.o expression.o
-		$(CC) $(CFLAGS) main.o token.o parser.o expression.o -o graph
+graph: main.o token.o parser.o expression.o exptree.o
+		$(CC) $(CFLAGS) main.o token.o parser.o expression.o exptree.o -o graph
 
 main.o: main.cc
 		$(CC) $(CFLAGS) -c main.cc
@@ -17,6 +17,9 @@ token.o: equation/token.cc
 
 expression.o: equation/expression/expression.cc
 		$(CC) $(CFLAGS) -c equation/expression/expression.cc
+
+exptree.o: equation/exptree/exptree.cc
+		$(CC) $(CFLAGS) -c equation/exptree/exptree.cc
 
 clean:
 		rm -rf *.o graph

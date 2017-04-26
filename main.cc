@@ -1,4 +1,5 @@
 #include "equation/expression/expression.h"
+#include "equation/exptree/exptree.h"
 #include "equation/parser/parser.h"
 #include <string>
 #include <queue>
@@ -12,13 +13,9 @@ int main(){
   getline(cin, test);
 
   Expression *e(Parser::parse_input(&test));
-  // e->printQueue();
-  e->evaluateQueue();
-  if (not e->success())
-    cout << *(e->state());
-  else {
-    e->printVariables();
-  }
-  cout << e->value() << '\n';
-  delete e;
+
+
+  ExpTree *exp_tree = new ExpTree(e->q());
+  // exp_tree->printTree();
+
 }

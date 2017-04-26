@@ -27,16 +27,6 @@ inline bool isLetter(char a){
   return (a >= 'a') && (a <= 'z');
 }
 
-// NUMERIC,
-// LETTER,
-// UNARY_MINUS,
-// UNARY_OPERATOR,
-// BINARY_OPERATOR,
-// OPEN_BRACKET,
-// CLOSE_BRACKET,
-// ERROR,
-// START
-
 inline bool isSimpleOP(char a, Parser::MODE last_mode){
   return
         ( (last_mode != Parser::MODE::UNARY_MINUS)     &&

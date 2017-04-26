@@ -13,6 +13,8 @@ enum class TOKEN_TYPE{
 };
 
 struct Token {
+  Token();
+  Token(TOKEN_TYPE _type, std::string &&str);
   TOKEN_TYPE type = TOKEN_TYPE::NONE;
   std::string value{};
 

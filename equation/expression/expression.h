@@ -39,6 +39,7 @@ private:
   double m_value;
 
 public:
+  std::queue<Token> *q(){ return token_queue; }
   void setState(std::string && st);
   std::string *state();
   bool success();
