@@ -54,17 +54,15 @@ ExpTree::ExpTree(std::queue<Token> *token_queue){
         n_stack->push(node);
         node = new Node;
         break;
-      // case TOKEN_TYPE::UNARY_OP:
-        // if (stck->size() < 1){
-        //   syntax_error = true;
-        //   break;
-        // }
-        // a = stck->top();
-        // stck->pop();
-        // stck->push(un_maps[current.value](a));
-        // break;
-      // default:
-      //   break;
+      case TOKEN_TYPE::UNARY_OP:
+        node->right = n_stack->top();
+        n_stack->pop();
+        node->token = current;
+        n_stack->push(node);
+        node = new Node;
+        break;
+      default:
+        break;
     }
   }
   exp_tree = n_stack->top();
@@ -76,13 +74,13 @@ void ExpTree::printTree(){
 }
 
 void ExpTree::printTreeInternal(Node *node){
+  cout << "(";
   if (node->left){
-    cout << "(";
     printTreeInternal(node->left);
   }
   node->token.printVal();
   if (node->right){
     printTreeInternal(node->right);
-    cout << ")";
   }
+  cout << ")";
 }
