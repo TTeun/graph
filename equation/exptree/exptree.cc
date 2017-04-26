@@ -3,20 +3,33 @@
 using namespace std;
 
 ExpTree::ExpTree(){
+  cout << "ExpTree empty constructor\n";
   exp_tree = new Node();
   exp_tree->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
   exp_tree->left = new Node();
   exp_tree->left->token = Token(TOKEN_TYPE::NUM, "3");
   exp_tree->right = new Node();
   exp_tree->right->token = Token(TOKEN_TYPE::NUM, "3");
+  Node *left  = exp_tree;
+  exp_tree = new Node();
+  exp_tree->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
+  exp_tree->left = new Node();
+  exp_tree->left->token = Token(TOKEN_TYPE::NUM, "3");
+  exp_tree->right = new Node();
+  exp_tree->right->token = Token(TOKEN_TYPE::NUM, "3");
+  Node *right  = exp_tree;
+  exp_tree = new Node();
+  exp_tree->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
+  exp_tree->left = left;
+  exp_tree->right = right;
+  // printTree();
 }
 
 ExpTree::ExpTree(std::queue<Token> *token_queue){
 
   Node *node = new Node;
-
-
   stack<Token> *stck = new stack<Token>;
+  stack<Node*> *n_stack = new stack<Node*>;
   Token current;
 
   while (not token_queue->empty())
@@ -28,14 +41,18 @@ ExpTree::ExpTree(std::queue<Token> *token_queue){
         // paren_mismatch = true;
         break;
       case TOKEN_TYPE::NUM:
-        stck->push(current);
+        node->token = current;
+        n_stack->push(node);
+        node = new Node;
         break;
       case TOKEN_TYPE::BINARY_OP:
-        node->left = new Node(stck->top());
-        stck->pop();
-        node->right = new Node(stck->top());
-        stck->pop();
+        node->right = n_stack->top();
+        n_stack->pop();
+        node->left = n_stack->top();
+        n_stack->pop();
         node->token = current;
+        n_stack->push(node);
+        node = new Node;
         break;
       // case TOKEN_TYPE::UNARY_OP:
         // if (stck->size() < 1){
@@ -50,7 +67,7 @@ ExpTree::ExpTree(std::queue<Token> *token_queue){
       //   break;
     }
   }
-  printTreeInternal(node);
+  exp_tree = n_stack->top();
 }
 
 

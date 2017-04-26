@@ -40,5 +40,5 @@ void Token::printToken(){
 }
 
 void Token::printVal(){
-  cout << value << ' ';
+  cout << ' ' << value << ' ';
 }
