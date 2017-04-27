@@ -17,6 +17,8 @@ int main(){
 
   ExpTree *exp_tree = new ExpTree(e->q());
   exp_tree->printTree();
+  exp_tree->differentiate();
+  exp_tree->printDif();
   delete exp_tree;
   delete e;
 }
