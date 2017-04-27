@@ -38,7 +38,7 @@ private:
   void cleanChildren(Node *node);
   void copyRight(Node *node);
   void copyLeft(Node *node);
-
+  void handleSumNode(Node *node);
   void checkEasySimplify(Node* node);
   Node* copyNode(Node *node);
   Node* differentiateNode(Node *node);

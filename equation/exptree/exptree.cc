@@ -192,94 +192,93 @@ void ExpTree::getSumNodes(Node *node, vector<Node*> *sumNodes){
     getSumNodes(node->right, sumNodes);
 }
 
+void ExpTree::handleSumNode(Node *node){
+  vector<Node*> *sumNodes = new vector<Node*>;
+  getSumNodes(node, sumNodes);
+
+  map<string, size_t> *var_counter = new map<string, size_t>;
+  float sum = 0;
+  for (Node *node : *sumNodes){
+    switch (node->token.type) {
+      case TOKEN_TYPE::NUM:
+        sum += stod(node->token.value);
+        break;
+      case TOKEN_TYPE::VAR:
+        {
+          auto it = var_counter->find(node->token.value);
+          if (it != var_counter->end())
+            it->second++;
+          else
+            (*var_counter)[node->token.value] = 1;
+        }
+        break;
+      case TOKEN_TYPE::BINARY_OP:
+        break;
+
+      case TOKEN_TYPE::UNARY_OP:
+        break;
+
+      case TOKEN_TYPE::NONE:
+        break;
+      default:
+        break;
+    }
+  }
+  delete sumNodes;
+  clearNode(node->right);
+  clearNode(node->left);
+  ostringstream str1;
+
+  if (var_counter->size() == 0){
+    str1 << sum;
+    node->token = Token(TOKEN_TYPE::NUM, str1.str());
+    node->right = nullptr;
+    node->left = nullptr;
+    return;
+  }
+  vector<Node*> *var_nodes = new vector<Node*>;
+  Node *new_node;
+  for (auto &m : *var_counter){
+    new_node = new Node;
+    new_node->token = Token(TOKEN_TYPE::BINARY_OP, string("*"));
+    new_node->right = new Node;
+    new_node->right->token = Token(TOKEN_TYPE::VAR, m.first);
+    new_node->left = new Node;
+    str1.str(string(""));
+    str1 << m.second;
+
+    new_node->left->token = Token(TOKEN_TYPE::NUM, str1.str());
+    var_nodes->push_back(new_node);
+  }
+  str1.str(string(""));
+  str1 << sum;
+
+  node->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
+  node->left = new Node;
+  node->left->token = Token(TOKEN_TYPE::NUM, str1.str());
+  Node *parent = node;
+  for (size_t idx = 0; idx < var_nodes->size() - 1; ++idx){
+    parent->right = new Node;
+
+    parent->right->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
+    parent->right->left = var_nodes->at(idx);
+    parent = parent->right;
+  }
+  parent->right = var_nodes->back();
+
+
+  delete var_nodes;
+  delete var_counter;
+}
+
 void ExpTree::simplifyNode(Node *node){
   if (node->token.type == TOKEN_TYPE::NUM)
     return;
   if (node->token.type == TOKEN_TYPE::VAR)
     return;
 
-  if (isSumNode(node)){
-    vector<Node*> *sumNodes = new vector<Node*>;
-    getSumNodes(node, sumNodes);
-
-    map<string, size_t> *var_counter = new map<string, size_t>;
-    float sum = 0;
-    for (Node *node : *sumNodes){
-      switch (node->token.type) {
-        case TOKEN_TYPE::NUM:
-          sum += stod(node->token.value);
-          break;
-        case TOKEN_TYPE::VAR:
-          {
-            auto it = var_counter->find(node->token.value);
-            if (it != var_counter->end())
-              it->second++;
-            else
-              (*var_counter)[node->token.value] = 1;
-          }
-          break;
-        case TOKEN_TYPE::BINARY_OP:
-          break;
-
-        case TOKEN_TYPE::UNARY_OP:
-          break;
-
-        case TOKEN_TYPE::NONE:
-          break;
-        default:
-          break;
-      }
-    }
-    delete sumNodes;
-    // cout << sum << '\n';
-    // for (auto &m : *var_counter){
-    //   cout << m.first << " " << m.second << "\n";
-    // }
-    clearNode(node->right);
-    clearNode(node->left);
-    ostringstream str1;
-
-    if (var_counter->size() == 0){
-      str1 << sum;
-      node->token = Token(TOKEN_TYPE::NUM, str1.str());
-      node->right = nullptr;
-      node->left = nullptr;
-      return;
-    }
-    vector<Node*> *var_nodes = new vector<Node*>;
-    Node *new_node;
-    for (auto &m : *var_counter){
-      new_node = new Node;
-      new_node->token = Token(TOKEN_TYPE::BINARY_OP, string("*"));
-      new_node->right = new Node;
-      new_node->right->token = Token(TOKEN_TYPE::VAR, m.first);
-      new_node->left = new Node;
-      str1.str(string(""));
-      str1 << m.second;
-
-      new_node->left->token = Token(TOKEN_TYPE::NUM, str1.str());
-      var_nodes->push_back(new_node);
-    }
-    str1.str(string(""));
-    str1 << sum;
-
-    node->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
-    node->left = new Node;
-    node->left->token = Token(TOKEN_TYPE::NUM, str1.str());
-    Node *parent = node;
-    for (size_t idx = 0; idx < var_nodes->size() - 1; ++idx){
-      parent->right = new Node;
-
-      parent->right->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
-      parent->right->left = var_nodes->at(idx);
-      parent = parent->right;
-    }
-    parent->right = var_nodes->back();
-
-
-    delete var_nodes;
-    delete var_counter;
-  }
+  if (isSumNode(node))
+    handleSumNode(node);
 
   if (node->left)
     simplifyNode(node->left);
