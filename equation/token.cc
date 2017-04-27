@@ -13,6 +13,12 @@ Token::Token(TOKEN_TYPE _type, string &&str)
 {
 }
 
+Token::Token(TOKEN_TYPE _type, string const &str)
+  : type(_type),
+    value(str)
+{
+}
+
 void Token::printToken(){
   cout << "(";
   switch (type) {

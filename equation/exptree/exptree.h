@@ -2,7 +2,7 @@
 #define TREE__H
 
 #include "../expression/expression.h"
-
+#include <vector>
 
 class ExpTree {
 public:
@@ -33,6 +33,8 @@ private:
   bool isVar(Node *node);
   bool isNum(Node *node);
   bool isVarExp(Node *node);
+  bool isSumNode(Node *node);
+  void getSumNodes(Node *node, std::vector<Node*> *sumNodes);
   void cleanChildren(Node *node);
   void copyRight(Node *node);
   void copyLeft(Node *node);

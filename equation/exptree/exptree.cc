@@ -1,29 +1,10 @@
 #include "exptree.h"
 #include <sstream>
+#include <map>
 
 using namespace std;
 
-ExpTree::ExpTree(){
-  cout << "ExpTree empty constructor\n";
-  exp_tree = new Node();
-  exp_tree->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
-  exp_tree->left = new Node();
-  exp_tree->left->token = Token(TOKEN_TYPE::NUM, "3");
-  exp_tree->right = new Node();
-  exp_tree->right->token = Token(TOKEN_TYPE::NUM, "3");
-  Node *left  = exp_tree;
-  exp_tree = new Node();
-  exp_tree->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
-  exp_tree->left = new Node();
-  exp_tree->left->token = Token(TOKEN_TYPE::NUM, "3");
-  exp_tree->right = new Node();
-  exp_tree->right->token = Token(TOKEN_TYPE::NUM, "3");
-  Node *right  = exp_tree;
-  exp_tree = new Node();
-  exp_tree->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
-  exp_tree->left = left;
-  exp_tree->right = right;
-}
+ExpTree::ExpTree(){}
 
 ExpTree::ExpTree(std::queue<Token> *token_queue){
 
@@ -77,6 +58,7 @@ ExpTree::ExpTree(std::queue<Token> *token_queue){
 
 ExpTree::~ExpTree(){
   clearNode(exp_tree);
+  clearNode(dif_tree);
 }
 
 void ExpTree::simplify(){
@@ -125,10 +107,6 @@ void ExpTree::copyRight(Node *node){
   delete temp;
 }
 void ExpTree::cleanChildren(Node *node){
-  if (node->left)
-    delete node->left;
-  if (node->right)
-    delete node->right;
   node->left = nullptr;
   node->right = nullptr;
 }
@@ -148,6 +126,8 @@ void ExpTree::checkEasySimplify(Node *node){
   if (node->token.value == string("*")){
     if (isZero(node->left) || isZero(node->right)){
       node->token = Token(TOKEN_TYPE::NUM, string("0"));
+      clearNode(node->left);
+      clearNode(node->right);
       cleanChildren(node);
       return;
     }
@@ -191,6 +171,25 @@ void ExpTree::checkEasySimplify(Node *node){
       return;
     }
   }
+
+  if (node->token.value == string("^") && node->right->token.value == string("1")){
+    copyLeft(node);
+  }
+}
+
+bool ExpTree::isSumNode(Node *node){
+  bool left = node->left ? isSumNode(node->left) : true;
+  bool right = node->right ? isSumNode(node->right) : true;
+  return ((node->token.value == string("+") || node->token.type == TOKEN_TYPE::NUM || node->token.type == TOKEN_TYPE::VAR) && left && right);
+}
+
+void ExpTree::getSumNodes(Node *node, vector<Node*> *sumNodes){
+  if (node->token.type != TOKEN_TYPE::BINARY_OP)
+    sumNodes->push_back(node);
+  if (node->left)
+    getSumNodes(node->left, sumNodes);
+  if (node->right)
+    getSumNodes(node->right, sumNodes);
 }
 
 void ExpTree::simplifyNode(Node *node){
@@ -198,6 +197,89 @@ void ExpTree::simplifyNode(Node *node){
     return;
   if (node->token.type == TOKEN_TYPE::VAR)
     return;
+
+  if (isSumNode(node)){
+    vector<Node*> *sumNodes = new vector<Node*>;
+    getSumNodes(node, sumNodes);
+
+    map<string, size_t> *var_counter = new map<string, size_t>;
+    float sum = 0;
+    for (Node *node : *sumNodes){
+      switch (node->token.type) {
+        case TOKEN_TYPE::NUM:
+          sum += stod(node->token.value);
+          break;
+        case TOKEN_TYPE::VAR:
+          {
+            auto it = var_counter->find(node->token.value);
+            if (it != var_counter->end())
+              it->second++;
+            else
+              (*var_counter)[node->token.value] = 1;
+          }
+          break;
+        case TOKEN_TYPE::BINARY_OP:
+          break;
+
+        case TOKEN_TYPE::UNARY_OP:
+          break;
+
+        case TOKEN_TYPE::NONE:
+          break;
+        default:
+          break;
+      }
+    }
+    delete sumNodes;
+    // cout << sum << '\n';
+    // for (auto &m : *var_counter){
+    //   cout << m.first << " " << m.second << "\n";
+    // }
+    clearNode(node->right);
+    clearNode(node->left);
+    ostringstream str1;
+
+    if (var_counter->size() == 0){
+      str1 << sum;
+      node->token = Token(TOKEN_TYPE::NUM, str1.str());
+      node->right = nullptr;
+      node->left = nullptr;
+      return;
+    }
+    vector<Node*> *var_nodes = new vector<Node*>;
+    Node *new_node;
+    for (auto &m : *var_counter){
+      new_node = new Node;
+      new_node->token = Token(TOKEN_TYPE::BINARY_OP, string("*"));
+      new_node->right = new Node;
+      new_node->right->token = Token(TOKEN_TYPE::VAR, m.first);
+      new_node->left = new Node;
+      str1.str(string(""));
+      str1 << m.second;
+
+      new_node->left->token = Token(TOKEN_TYPE::NUM, str1.str());
+      var_nodes->push_back(new_node);
+    }
+    str1.str(string(""));
+    str1 << sum;
+
+    node->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
+    node->left = new Node;
+    node->left->token = Token(TOKEN_TYPE::NUM, str1.str());
+    Node *parent = node;
+    for (size_t idx = 0; idx < var_nodes->size() - 1; ++idx){
+      parent->right = new Node;
+
+      parent->right->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
+      parent->right->left = var_nodes->at(idx);
+      parent = parent->right;
+    }
+    parent->right = var_nodes->back();
+
+
+    delete var_nodes;
+    delete var_counter;
+  }
 
   if (node->left)
     simplifyNode(node->left);
@@ -309,6 +391,9 @@ ExpTree::Node *ExpTree::differentiateNode(Node *node){
     }
 
   }
+
+
+  cout << "Shouldn't get here! Missing derivative pattern in exptree.cc\n";
 
   delete new_node;
   return nullptr;

@@ -19,5 +19,6 @@ EqMaps::map_un EqMaps::un_maps =
     {"cos", cos},
     {"tan", tan},
     {"exp", exp},
-    {"-u", [](double a){return -a;}}
+    {"-u", [](double a){return -a;}},
+    // {"log", log}
   };
