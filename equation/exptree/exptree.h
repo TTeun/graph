@@ -31,7 +31,11 @@ private:
   bool isZero(Node *node);
   bool isOne(Node *node);
   bool isVar(Node *node);
+  bool isNum(Node *node);
+  bool isVarExp(Node *node);
   void cleanChildren(Node *node);
+  void copyRight(Node *node);
+  void copyLeft(Node *node);
 
   void checkEasySimplify(Node* node);
   Node* copyNode(Node *node);

@@ -95,6 +95,35 @@ bool ExpTree::isVar(Node *node){
   return node->token.type == TOKEN_TYPE::VAR;
 }
 
+bool ExpTree::isNum(Node *node){
+  return node->token.type == TOKEN_TYPE::NUM;
+}
+
+bool ExpTree::isVarExp(Node *node){
+  return (
+          node->token.value == string("^") &&
+          node->left->token.type == TOKEN_TYPE::VAR &&
+          node->right->token.type == TOKEN_TYPE::NUM
+        );
+}
+
+void ExpTree::copyLeft(Node *node){
+  node->token = node->left->token;
+  Node *temp = node->left;
+  delete node->right;
+  node->right = node->left->right;
+  node->left = node->left->left;
+  delete temp;
+}
+
+void ExpTree::copyRight(Node *node){
+  node->token = node->right->token;
+  Node *temp = node->right;
+  delete node->left;
+  node->left = node->right->left;
+  node->right = node->right->right;
+  delete temp;
+}
 void ExpTree::cleanChildren(Node *node){
   if (node->left)
     delete node->left;
@@ -105,16 +134,16 @@ void ExpTree::cleanChildren(Node *node){
 }
 
 void ExpTree::checkEasySimplify(Node *node){
-  if (node->token.value == string("+"))
-    if (isZero(node->left) || isZero(node->right)){
-      if (isZero(node->left))
-        node->token = node->right->token;
-      else
-        node->token = node->left->token;
-
-      cleanChildren(node);
+  if (node->token.value == string("+") || node->token.value == string("-")){
+    if (isZero(node->left)){
+      copyRight(node);
       return;
     }
+    if (isZero(node->right)){
+      copyLeft(node);
+      return;
+    }
+  }
 
   if (node->token.value == string("*")){
     if (isZero(node->left) || isZero(node->right)){
@@ -124,14 +153,12 @@ void ExpTree::checkEasySimplify(Node *node){
     }
 
     if (isOne(node->left)){
-      node->token = node->right->token;
+      copyRight(node);
       return;
-      cleanChildren(node);
     }
 
     if (isOne(node->right)){
-      node->token = node->left->token;
-      cleanChildren(node);
+      copyLeft(node);
       return;
     }
   }
@@ -143,13 +170,27 @@ void ExpTree::checkEasySimplify(Node *node){
     if (node->token.value == string("+")){
       node->token.value = string("*");
       node->left->token = Token(TOKEN_TYPE::NUM, string("2"));
+      return;
     }
+
     if (node->token.value == string("-")){
-      node->token  = Token(TOKEN_TYPE::NUM, string("0"));
+      node->token = Token(TOKEN_TYPE::NUM, string("0"));
+      return;
       cleanChildren(node);
     }
-  }
 
+    if (node->token.value == string("/")){
+      node->token = Token(TOKEN_TYPE::NUM, string("1"));
+      return;
+      cleanChildren(node);
+    }
+
+    if (node->token.value == string("*")){
+      node->token = Token(TOKEN_TYPE::BINARY_OP, string("^"));
+      node->right->token = Token(TOKEN_TYPE::NUM, string("2"));
+      return;
+    }
+  }
 }
 
 void ExpTree::simplifyNode(Node *node){
@@ -247,6 +288,24 @@ ExpTree::Node *ExpTree::differentiateNode(Node *node){
       new_node->left = left;
       new_node->right = right;
       return new_node;
+    }
+    if (node->token.value == string("^")){
+      if (isVar(node->left) && isNum(node->right)){
+        ostringstream str1, str2;
+        str1 << getNum(node->right) - 1;
+        str2 << getNum(node->right);
+
+        Node *left = new Node;
+        Node *right = copyNode(node);
+        right->right->token.value = str1.str();
+        left->token = Token(TOKEN_TYPE::NUM, str2.str());
+
+        new_node->token = Token(TOKEN_TYPE::BINARY_OP, string("*"));
+        new_node->right = right;
+        new_node->left = left;
+        return new_node;
+      }
+
     }
 
   }
