@@ -28,7 +28,6 @@ ExpTree::ExpTree(){
 ExpTree::ExpTree(std::queue<Token> *token_queue){
 
   Node *node = new Node;
-  stack<Token> *stck = new stack<Token>;
   stack<Node*> *n_stack = new stack<Node*>;
   Token current;
 
@@ -41,6 +40,11 @@ ExpTree::ExpTree(std::queue<Token> *token_queue){
         // paren_mismatch = true;
         break;
       case TOKEN_TYPE::NUM:
+        node->token = current;
+        n_stack->push(node);
+        node = new Node;
+        break;
+      case TOKEN_TYPE::VAR:
         node->token = current;
         n_stack->push(node);
         node = new Node;
@@ -65,9 +69,23 @@ ExpTree::ExpTree(std::queue<Token> *token_queue){
         break;
     }
   }
+  delete node; // We do not need a new node anymore
   exp_tree = n_stack->top();
+  delete n_stack;
 }
 
+ExpTree::~ExpTree(){
+
+  clearNode(exp_tree);
+}
+
+void ExpTree::clearNode(Node *node){
+  if (node->left)
+    clearNode(node->left);
+  if (node->right)
+    clearNode(node->right);
+  delete node;
+}
 
 void ExpTree::printTree(){
   printTreeInternal(exp_tree);

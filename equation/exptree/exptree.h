@@ -8,7 +8,7 @@ class ExpTree {
 public:
   ExpTree();
   ExpTree(std::queue<Token> *token_queue);
-
+  ~ExpTree();
   void printTree();
 
 private:
@@ -23,7 +23,7 @@ private:
     Node *right = nullptr;
   };
   Node *exp_tree = nullptr;
-
+  void clearNode(Node *node);
   void printTreeInternal(Node *node);
 
 };

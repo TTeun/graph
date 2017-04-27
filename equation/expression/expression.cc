@@ -115,6 +115,7 @@ void Expression::evaluateQueue()
 
   else
     m_value = stck->top();
+    
   delete stck;
 }
 

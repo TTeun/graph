@@ -13,8 +13,10 @@ int main(){
   getline(cin, test);
 
   Expression *e(Parser::parse_input(&test));
-
+  // e->printQueue();
 
   ExpTree *exp_tree = new ExpTree(e->q());
   exp_tree->printTree();
+  delete exp_tree;
+  delete e;
 }
