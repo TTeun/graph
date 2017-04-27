@@ -24,24 +24,6 @@ Expression::~Expression()
   delete m_state;
 }
 
-Expression::map_bin Expression::bin_maps =
-  {
-    {"+", [](double a, double b){return a + b;}},
-    {"-", [](double a, double b){return a - b;}},
-    {"*", [](double a, double b){return a * b;}},
-    {"/", [](double a, double b){return b == 0 ? numeric_limits<double>::quiet_NaN() : a / b;}},
-    {"^", pow}
-  };
-
-Expression::map_un Expression::un_maps =
-  {
-    {"sin", sin},
-    {"cos", cos},
-    {"tan", tan},
-    {"exp", exp},
-    {"-u", [](double a){return -a;}}
-  };
-
 constexpr double Expression::PI;
 
 void Expression::printVariables()
@@ -64,7 +46,7 @@ bool Expression::binToNum(string &str, stack<double> *stck)
   stck->pop();
   a = stck->top();
   stck->pop();
-  stck->push(bin_maps[str](a,b));
+  stck->push(EqMaps::bin_maps[str](a,b));
   return true;
 }
 
@@ -100,7 +82,7 @@ void Expression::evaluateQueue()
         }
         a = stck->top();
         stck->pop();
-        stck->push(un_maps[current.value](a));
+        stck->push(EqMaps::un_maps[current.value](a));
         break;
       default:
         break;
@@ -115,7 +97,7 @@ void Expression::evaluateQueue()
 
   else
     m_value = stck->top();
-    
+
   delete stck;
 }
 

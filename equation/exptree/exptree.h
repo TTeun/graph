@@ -25,6 +25,11 @@ private:
   Node *exp_tree = nullptr;
   void clearNode(Node *node);
   void printTreeInternal(Node *node);
+  void simplifyNode(Node *node);
+  bool isTerminalNum(Node *node);
+  double getNum(Node *node);
+public:
+  void simplify();
 
 };
 

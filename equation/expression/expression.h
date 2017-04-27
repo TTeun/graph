@@ -7,9 +7,9 @@
 #include <stack>
 #include <iostream>
 #include <unordered_map>
-#include <cmath>
 
 #include "../token.h"
+#include "../eqmaps/eqmaps.h"
 
 class Expression {
 public:
@@ -19,15 +19,6 @@ public:
 
 private:
   std::queue<Token> *token_queue;
-
-  typedef double (*f_bin)(double a, double b);
-  typedef double (*f_un)(double a);
-  typedef std::unordered_map<std::string, f_bin> map_bin;
-  typedef std::unordered_map<std::string, f_un> map_un;
-
-  static std::unordered_map<std::string, f_bin> bin_maps;
-  static std::unordered_map<std::string, f_un> un_maps;
-  // std::unordered_map<std::string, double> var_map;
 
   static double constexpr PI = 3.141592653589793;
   double toNum(std::string &str);

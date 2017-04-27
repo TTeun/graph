@@ -1,4 +1,5 @@
 #include "exptree.h"
+#include <sstream>
 
 using namespace std;
 
@@ -72,11 +73,48 @@ ExpTree::ExpTree(std::queue<Token> *token_queue){
   delete node; // We do not need a new node anymore
   exp_tree = n_stack->top();
   delete n_stack;
+  simplify();
 }
 
 ExpTree::~ExpTree(){
 
   clearNode(exp_tree);
+}
+
+void ExpTree::simplify(){
+  simplifyNode(exp_tree);
+}
+
+void ExpTree::simplifyNode(Node *node){
+  if (node->token.type == TOKEN_TYPE::NUM)
+    return;
+  if (node->token.type == TOKEN_TYPE::VAR)
+    return;
+
+  if (node->left)
+    simplifyNode(node->left);
+  if (node->right)
+    simplifyNode(node->right);
+
+  if (node->token.type == TOKEN_TYPE::BINARY_OP)
+    if (isTerminalNum(node->left) && isTerminalNum(node->right)){
+      node->token.type = TOKEN_TYPE::NUM;
+      ostringstream strs;
+      strs << (EqMaps::bin_maps[node->token.value](getNum(node->left), getNum(node->right)));
+      node->token.value = strs.str();
+      delete node->left;
+      delete node->right;
+      node->left = nullptr;
+      node->right = nullptr;
+    }
+}
+
+bool ExpTree::isTerminalNum(Node *node){
+  return (not (node->left || node->right) && node->token.type == TOKEN_TYPE::NUM);
+}
+
+double ExpTree::getNum(Node *node){
+  return stod(node->token.value);
 }
 
 void ExpTree::clearNode(Node *node){

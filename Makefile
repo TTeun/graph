@@ -3,8 +3,8 @@ CFLAGS = -std=c++11 -Wall -Werror
 
 all: graph
 
-graph: main.o token.o parser.o expression.o exptree.o
-		$(CC) $(CFLAGS) main.o token.o parser.o expression.o exptree.o -o graph
+graph: main.o token.o parser.o expression.o exptree.o eqmaps.o
+		$(CC) $(CFLAGS) main.o token.o parser.o expression.o exptree.o eqmaps.o -o graph
 
 main.o: main.cc
 		$(CC) $(CFLAGS) -c main.cc
@@ -20,6 +20,9 @@ expression.o: equation/expression/expression.cc
 
 exptree.o: equation/exptree/exptree.cc
 		$(CC) $(CFLAGS) -c equation/exptree/exptree.cc
+
+eqmaps.o: equation/eqmaps/eqmaps.cc
+		$(CC) $(CFLAGS) -c equation/eqmaps/eqmaps.cc
 
 clean:
 		rm -rf *.o graph
