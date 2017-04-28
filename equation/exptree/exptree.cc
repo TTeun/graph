@@ -1,12 +1,19 @@
 #include "exptree.h"
 #include <sstream>
 #include <map>
+#include <iostream>
+#include <stack>
+#include "../eqmaps/eqmaps.h"
+#include "diff.h"
+#include "node_util.h"
 
 using namespace std;
+using namespace node_util;
 
 ExpTree::ExpTree(){}
 
-ExpTree::ExpTree(std::queue<Token> *token_queue){
+ExpTree::ExpTree(std::queue<Token> *token_queue)
+{
 
   Node *node = new Node;
   stack<Node*> *n_stack = new stack<Node*>;
@@ -62,7 +69,7 @@ ExpTree::~ExpTree(){
 }
 
 void ExpTree::simplify(){
-  simplifyNode(exp_tree);
+  // simplifyNode(exp_tree);
 }
 
 bool ExpTree::isZero(Node *node){
@@ -89,37 +96,35 @@ bool ExpTree::isVarExp(Node *node){
         );
 }
 
-void ExpTree::copyLeft(Node *node){
-  node->token = node->left->token;
-  Node *temp = node->left;
-  delete node->right;
-  node->right = node->left->right;
-  node->left = node->left->left;
-  delete temp;
-}
-
-void ExpTree::copyRight(Node *node){
-  node->token = node->right->token;
-  Node *temp = node->right;
-  delete node->left;
-  node->left = node->right->left;
-  node->right = node->right->right;
-  delete temp;
-}
-
 void ExpTree::cleanChildren(Node *node){
   node->left = nullptr;
   node->right = nullptr;
 }
 
 void ExpTree::checkEasySimplify(Node *node){
-  if (node->token.value == string("+") || node->token.value == string("-")){
+  if (node->token.value == string("+")){
     if (isZero(node->left)){
-      copyRight(node);
+      node_util::copyRight(node);
       return;
     }
     if (isZero(node->right)){
-      copyLeft(node);
+      node_util::copyLeft(node);
+      return;
+    }
+  }
+
+  if (node->token.value == string("-")){
+    if (isZero(node->left)){
+      delete node->left;
+      node->left = nullptr;
+      node->token = Token(TOKEN_TYPE::UNARY_OP, string("-u"));
+      return;
+    }
+    if (isZero(node->right)){
+      delete node->right;
+      node->right = node->left;
+      node->left = nullptr;
+      node->token = Token(TOKEN_TYPE::UNARY_OP, string("-u"));
       return;
     }
   }
@@ -134,12 +139,12 @@ void ExpTree::checkEasySimplify(Node *node){
     }
 
     if (isOne(node->left)){
-      copyRight(node);
+      node_util::copyRight(node);
       return;
     }
 
     if (isOne(node->right)){
-      copyLeft(node);
+      node_util::copyLeft(node);
       return;
     }
   }
@@ -174,7 +179,7 @@ void ExpTree::checkEasySimplify(Node *node){
   }
 
   if (node->token.value == string("^") && node->right->token.value == string("1")){
-    copyLeft(node);
+    node_util::copyLeft(node);
   }
 }
 
@@ -319,121 +324,9 @@ double ExpTree::getNum(Node *node){
   return stod(node->token.value);
 }
 
-ExpTree::Node *ExpTree::copyNode(Node *node){
-  Node *new_node = new Node;
-  if (node->left)
-    new_node->left = copyNode(node->left);
-
-  if (node->right)
-    new_node->right = copyNode(node->right);
-
-  new_node->token = node->token;
-  return new_node;
-}
-
 void ExpTree::differentiate(){
-  dif_tree = differentiateNode(exp_tree);
+  dif_tree = diff::differentiateNode(exp_tree);
   simplifyNode(dif_tree);
-}
-
-ExpTree::Node *ExpTree::newNode(Token const &token, Node *right, Node *left){
-  Node *new_node = new Node(token);
-  new_node->left = left;
-  new_node->right = right;
-  return new_node;
-}
-
-ExpTree::Node* ExpTree::diffPlus(Node *node){
-  return newNode(node->token, differentiateNode(node->right), differentiateNode(node->left));
-}
-
-ExpTree::Node* ExpTree::diffMul(Node *node){
-  Node *left = newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), copyNode(node->right), differentiateNode(node->left));
-  Node *right = newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), differentiateNode(node->right), copyNode(node->left));
-  return newNode(Token(TOKEN_TYPE::BINARY_OP, string("+")), right, left);
-}
-
-ExpTree::Node* ExpTree::diffPow(Node *node){
-  if (isNum(node->right)){
-    ostringstream str1, str2;
-    str1 << getNum(node->right) - 1;
-    str2 << getNum(node->right);
-
-    Node *right = copyNode(node);
-    right->right->token.value = str1.str();
-
-    return newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, newNode(Token(TOKEN_TYPE::NUM, str2.str()), nullptr, nullptr));
-  }
-  return nullptr;
-}
-
-ExpTree::Node *ExpTree::diffSin(Node *node){
-  Node *new_node = newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), copyNode(node), differentiateNode(node->right));
-  new_node->right->token.value = string("cos");
-  return new_node;
-}
-
-ExpTree::Node *ExpTree::diffCos(Node *node){
-  Node *sin_node = newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), copyNode(node), differentiateNode(node->right));
-  sin_node->right->token.value = string("sin");
-
-  return newNode(Token(TOKEN_TYPE::UNARY_OP, string("-u")), sin_node);
-}
-
-ExpTree::Node* ExpTree::diffExp(Node *node){
-  return newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), copyNode(node), differentiateNode(node->right));
-}
-
-ExpTree::Node* ExpTree::diffUnaryMinus(Node *node){
-  Node *new_node = new Node(Token(TOKEN_TYPE::UNARY_OP, string("-u")));
-  new_node = differentiateNode(node->right);
-  return new_node;
-}
-
-ExpTree::Node *ExpTree::differentiateNode(Node *node){
-  switch (node->token.type) {
-    case TOKEN_TYPE::NUM:
-      return new Node(Token(TOKEN_TYPE::NUM, string("0")));
-      break;
-
-    case TOKEN_TYPE::VAR:
-      return new Node(Token(TOKEN_TYPE::VAR, string("1")));
-      break;
-
-    case TOKEN_TYPE::BINARY_OP:
-      if (node->token.value == string("+") || node->token.value == string("-"))
-        return diffPlus(node);
-
-      if (node->token.value == string("*"))
-        return diffMul(node);
-
-      if (node->token.value == string("^"))
-        return diffPow(node);
-
-      break;
-    case TOKEN_TYPE::UNARY_OP:
-      if (node->token.value == string("-"))
-        return diffUnaryMinus(node);
-
-      if (node->token.value == string("cos"))
-        return diffCos(node);
-
-      if (node->token.value == string("sin"))
-        return diffSin(node);
-
-      if (node->token.value == string("exp"))
-        return diffExp(node);
-
-    case TOKEN_TYPE::BRA:
-      break;
-    case TOKEN_TYPE::NONE:
-      break;
-
-    }
-
-  cout << "Shouldn't get here! Missing derivative pattern in exptree.cc\n";
-
-  return nullptr;
 }
 
 void ExpTree::clearNode(Node *node){

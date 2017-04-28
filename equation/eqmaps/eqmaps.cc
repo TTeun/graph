@@ -20,4 +20,18 @@ EqMaps::map_un EqMaps::un_maps =
     {"tan", tan},
     {"exp", exp},
     {"-u", [](double a){return -a;}},
+    {"log", log}
   };
+
+EqMaps::map_bin_diff EqMaps::bin_diff_maps = {
+  {"+", diff::diffPlus},
+  {"-", diff::diffMin},
+  {"*", diff::diffMul},
+  {"^", diff::diffPow},
+  {"sin", diff::diffSin},
+  {"cos", diff::diffCos},
+  {"exp", diff::diffExp},
+  {"log", diff::diffLog},
+  {"/", diff::diffDiv},
+  {"-u", [](Node* node){return node_util::newNode(node->token, diff::differentiateNode(node->right)); }}
+};

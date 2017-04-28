@@ -1,8 +1,10 @@
-#ifndef TREE__H
-#define TREE__H
+#ifndef EXPTREE__H
+#define EXPTREE__H
 
-#include "../expression/expression.h"
+// #include "../expression/expression.h"
+#include <queue>
 #include <vector>
+#include "../token.h"
 
 class ExpTree {
 public:
@@ -10,7 +12,6 @@ public:
   ExpTree(std::queue<Token> *token_queue);
   ~ExpTree();
 
-private:
   struct Node{
     Node(){}
     Node(Token const &_token){
@@ -24,8 +25,10 @@ private:
     Node *left = nullptr;
     Node *right = nullptr;
   };
+private:
   Node *exp_tree = nullptr;
   Node *dif_tree = nullptr;
+
   void clearNode(Node *node);
   void printTreeInternal(Node *node);
   void simplifyNode(Node *node);
@@ -40,25 +43,8 @@ private:
   bool isSumNode(Node *node);
   void getSumNodes(Node *node, std::vector<Node*> *sumNodes);
   void cleanChildren(Node *node);
-  void copyRight(Node *node);
-  void copyLeft(Node *node);
   void handleSumNode(Node *node);
   void checkEasySimplify(Node* node);
-
-
-  Node *newNode(Token const &token, Node *right, Node *left = nullptr);
-  Node* diffPlus(Node *node);
-  Node* diffMul(Node *node);
-  Node* diffPow(Node *node);
-  Node* diffDiv(Node *node);
-
-  Node* diffUnaryMinus(Node *node);
-  Node* diffSin(Node *node);
-  Node* diffExp(Node *node);
-  Node* diffCos(Node *node);
-
-  Node* copyNode(Node *node);
-  Node* differentiateNode(Node *node);
 
 public:
   void printTree();

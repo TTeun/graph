@@ -53,7 +53,8 @@ TOKEN_TYPE getTokenType(string *str){
     *str == string("sin") ||
     *str == string("cos") ||
     *str == string("tan") ||
-    *str == string("exp")
+    *str == string("exp") ||
+    *str == string("log")
   )
     return TOKEN_TYPE::UNARY_OP;
 
