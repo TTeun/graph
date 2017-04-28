@@ -16,6 +16,9 @@ private:
     Node(Token &_token){
       token = _token;
     }
+    Node(Token &&_token){
+      token = _token;
+    }
 
     Token token;
     Node *left = nullptr;
@@ -40,6 +43,12 @@ private:
   void copyLeft(Node *node);
   void handleSumNode(Node *node);
   void checkEasySimplify(Node* node);
+
+  Node* diffPlus(Node *node);
+  Node* diffMul(Node *node);
+  Node* diffPow(Node *node);
+  Node* diffDiv(Node *node);
+
   Node* copyNode(Node *node);
   Node* differentiateNode(Node *node);
 
