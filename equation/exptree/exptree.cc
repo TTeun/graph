@@ -359,11 +359,10 @@ ExpTree::Node* ExpTree::diffPow(Node *node){
     str1 << getNum(node->right) - 1;
     str2 << getNum(node->right);
 
-    Node *left = newNode(Token(TOKEN_TYPE::NUM, str2.str()), nullptr, nullptr);
     Node *right = copyNode(node);
     right->right->token.value = str1.str();
 
-    return newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, left);
+    return newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, newNode(Token(TOKEN_TYPE::NUM, str2.str()), nullptr, nullptr));
   }
   return nullptr;
 }
@@ -375,13 +374,10 @@ ExpTree::Node *ExpTree::diffSin(Node *node){
 }
 
 ExpTree::Node *ExpTree::diffCos(Node *node){
-  Node *sin_node = new Node(Token(TOKEN_TYPE::BINARY_OP, string("*")));
-  sin_node->left = differentiateNode(node->right);;
-  sin_node->right = copyNode(node);
+  Node *sin_node = newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), copyNode(node), differentiateNode(node->right));
   sin_node->right->token.value = string("sin");
-  Node *new_node = new Node(Token(TOKEN_TYPE::UNARY_OP, string("-u")));
-  new_node->right = sin_node;
-  return new_node;
+
+  return newNode(Token(TOKEN_TYPE::UNARY_OP, string("-u")), sin_node);
 }
 
 ExpTree::Node* ExpTree::diffExp(Node *node){
