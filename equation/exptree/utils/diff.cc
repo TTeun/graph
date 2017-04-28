@@ -1,7 +1,8 @@
 #include "diff.h"
 #include <iostream>
+#include <assert.h>
 #include <sstream>
-#include "../eqmaps/eqmaps.h"
+#include "../../eqmaps/eqmaps.h"
 
 using namespace std;
 

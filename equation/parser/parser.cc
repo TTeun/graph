@@ -295,6 +295,7 @@ Expression *Parser::to_queue(vector<Token> &token_list){
       {"cos", OpInfo(5, "R")},
       {"tan", OpInfo(5, "R")},
       {"exp", OpInfo(5, "R")},
+      {"log", OpInfo(5, "R")},
       {"-u", OpInfo(5, "R")}
     };
 

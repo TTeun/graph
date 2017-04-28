@@ -31,20 +31,6 @@ private:
 
   void clearNode(Node *node);
   void printTreeInternal(Node *node);
-  void simplifyNode(Node *node);
-  bool isTerminalNum(Node *node);
-  double getNum(Node *node);
-
-  bool isZero(Node *node);
-  bool isOne(Node *node);
-  bool isVar(Node *node);
-  bool isNum(Node *node);
-  bool isVarExp(Node *node);
-  bool isSumNode(Node *node);
-  void getSumNodes(Node *node, std::vector<Node*> *sumNodes);
-  void cleanChildren(Node *node);
-  void handleSumNode(Node *node);
-  void checkEasySimplify(Node* node);
 
 public:
   void printTree();

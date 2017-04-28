@@ -1,4 +1,7 @@
 #include "node_util.h"
+#include <string>
+
+using namespace std;
 
 namespace node_util{
 
@@ -12,14 +15,6 @@ namespace node_util{
 
     new_node->token = node->token;
     return new_node;
-  }
-
-  bool isNum(Node *node){
-    return node->token.type == TOKEN_TYPE::NUM;
-  }
-
-  double getNum(Node *node){
-    return stod(node->token.value);
   }
 
   Node *newNode(Token const &token, Node *right, Node *left){
@@ -46,5 +41,41 @@ namespace node_util{
     node->right = node->right->right;
     delete temp;
   }
+
+  bool isZero(Node *node){
+    return (node->token.type == TOKEN_TYPE::NUM && node->token.value == string("0"));
+  }
+
+  bool isOne(Node *node){
+    return (node->token.type == TOKEN_TYPE::NUM && node->token.value == string("1"));
+  }
+
+  bool isVar(Node *node){
+    return node->token.type == TOKEN_TYPE::VAR;
+  }
+
+  bool isNum(Node *node){
+    return node->token.type == TOKEN_TYPE::NUM;
+  }
+
+  bool isTerminalNum(Node *node){
+    return (not (node->left || node->right) && node->token.type == TOKEN_TYPE::NUM);
+  }
+
+  double getNum(Node *node){
+    return stod(node->token.value);
+  }
+
+  void copyChild(Node *node, Node *child_to_copy, Node *other){
+    delete other;
+
+    node->token = child_to_copy->token;
+    node->left  = child_to_copy->left;
+    node->right = child_to_copy->right;
+
+    delete child_to_copy;
+    return;
+  }
+
 
 }

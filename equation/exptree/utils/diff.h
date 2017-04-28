@@ -1,7 +1,7 @@
 #ifndef DIFF__H
 #define DIFF__H
 
-#include "exptree.h"
+#include "../exptree.h"
 #include "node_util.h"
 
 namespace diff {

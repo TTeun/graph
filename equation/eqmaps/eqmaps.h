@@ -2,7 +2,7 @@
 #define EQMAPS__H
 
 #include <unordered_map>
-#include "../exptree/diff.h"
+#include "../exptree/utils/diff.h"
 
 class EqMaps{
 public:
