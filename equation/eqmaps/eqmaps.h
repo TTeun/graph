@@ -14,9 +14,4 @@ public:
   static std::unordered_map<std::string, f_un> un_maps;
 };
 
-
-
-
-
-
 #endif

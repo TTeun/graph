@@ -336,50 +336,62 @@ void ExpTree::differentiate(){
   simplifyNode(dif_tree);
 }
 
-ExpTree::Node* ExpTree::diffPlus(Node *node){
-  Node *new_node = new Node;
-  new_node->token.type = TOKEN_TYPE::BINARY_OP;
-  new_node->token.value = string("+");
-  new_node->left = differentiateNode(node->left);
-  new_node->right = differentiateNode(node->right);
-}
-
-ExpTree::Node* ExpTree::diffMul(Node *node){
-  Node *left = new Node;
-  Node *right = new Node;
-  left->token = Token(TOKEN_TYPE::BINARY_OP, string("*"));
-  left->left = differentiateNode(node->left);
-  left->right = copyNode(node->right);
-
-  right->token = Token(TOKEN_TYPE::BINARY_OP, string("*"));
-  right->left = copyNode(node->left);
-  right->right = differentiateNode(node->right);
-
-  Node *new_node = new Node;
-  new_node->token = Token(TOKEN_TYPE::BINARY_OP, string("+"));
+ExpTree::Node *ExpTree::newNode(Token const &token, Node *right, Node *left){
+  Node *new_node = new Node(token);
   new_node->left = left;
   new_node->right = right;
   return new_node;
 }
 
+ExpTree::Node* ExpTree::diffPlus(Node *node){
+  return newNode(node->token, differentiateNode(node->right), differentiateNode(node->left));
+}
+
+ExpTree::Node* ExpTree::diffMul(Node *node){
+  Node *left = newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), copyNode(node->right), differentiateNode(node->left));
+  Node *right = newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), differentiateNode(node->right), copyNode(node->left));
+  return newNode(Token(TOKEN_TYPE::BINARY_OP, string("+")), right, left);
+}
+
 ExpTree::Node* ExpTree::diffPow(Node *node){
-  if (isVar(node->left) && isNum(node->right)){
+  if (isNum(node->right)){
     ostringstream str1, str2;
     str1 << getNum(node->right) - 1;
     str2 << getNum(node->right);
 
-    Node *left = new Node;
+    Node *left = newNode(Token(TOKEN_TYPE::NUM, str2.str()), nullptr, nullptr);
     Node *right = copyNode(node);
     right->right->token.value = str1.str();
-    left->token = Token(TOKEN_TYPE::NUM, str2.str());
 
-    Node *new_node = new Node;
-    new_node->token = Token(TOKEN_TYPE::BINARY_OP, string("*"));
-    new_node->right = right;
-    new_node->left = left;
-    return new_node;
+    return newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, left);
   }
   return nullptr;
+}
+
+ExpTree::Node *ExpTree::diffSin(Node *node){
+  Node *new_node = newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), copyNode(node), differentiateNode(node->right));
+  new_node->right->token.value = string("cos");
+  return new_node;
+}
+
+ExpTree::Node *ExpTree::diffCos(Node *node){
+  Node *sin_node = new Node(Token(TOKEN_TYPE::BINARY_OP, string("*")));
+  sin_node->left = differentiateNode(node->right);;
+  sin_node->right = copyNode(node);
+  sin_node->right->token.value = string("sin");
+  Node *new_node = new Node(Token(TOKEN_TYPE::UNARY_OP, string("-u")));
+  new_node->right = sin_node;
+  return new_node;
+}
+
+ExpTree::Node* ExpTree::diffExp(Node *node){
+  return newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), copyNode(node), differentiateNode(node->right));
+}
+
+ExpTree::Node* ExpTree::diffUnaryMinus(Node *node){
+  Node *new_node = new Node(Token(TOKEN_TYPE::UNARY_OP, string("-u")));
+  new_node = differentiateNode(node->right);
+  return new_node;
 }
 
 ExpTree::Node *ExpTree::differentiateNode(Node *node){
@@ -404,7 +416,22 @@ ExpTree::Node *ExpTree::differentiateNode(Node *node){
 
       break;
     case TOKEN_TYPE::UNARY_OP:
+      if (node->token.value == string("-"))
+        return diffUnaryMinus(node);
 
+      if (node->token.value == string("cos"))
+        return diffCos(node);
+
+      if (node->token.value == string("sin"))
+        return diffSin(node);
+
+      if (node->token.value == string("exp"))
+        return diffExp(node);
+
+    case TOKEN_TYPE::BRA:
+      break;
+    case TOKEN_TYPE::NONE:
+      break;
 
     }
 

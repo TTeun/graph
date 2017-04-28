@@ -13,7 +13,7 @@ public:
 private:
   struct Node{
     Node(){}
-    Node(Token &_token){
+    Node(Token const &_token){
       token = _token;
     }
     Node(Token &&_token){
@@ -31,6 +31,7 @@ private:
   void simplifyNode(Node *node);
   bool isTerminalNum(Node *node);
   double getNum(Node *node);
+
   bool isZero(Node *node);
   bool isOne(Node *node);
   bool isVar(Node *node);
@@ -44,10 +45,17 @@ private:
   void handleSumNode(Node *node);
   void checkEasySimplify(Node* node);
 
+
+  Node *newNode(Token const &token, Node *right, Node *left = nullptr);
   Node* diffPlus(Node *node);
   Node* diffMul(Node *node);
   Node* diffPow(Node *node);
   Node* diffDiv(Node *node);
+
+  Node* diffUnaryMinus(Node *node);
+  Node* diffSin(Node *node);
+  Node* diffExp(Node *node);
+  Node* diffCos(Node *node);
 
   Node* copyNode(Node *node);
   Node* differentiateNode(Node *node);
