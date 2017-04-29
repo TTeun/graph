@@ -18,6 +18,8 @@ namespace node_util {
   bool isTerminalNum(Node *node);
   double getNum(Node *node);
   void deleteTree(Node *node);
+  void deleteChildren(Node *node);
+  std::string doubleToString(double a);
 }
 
 #endif

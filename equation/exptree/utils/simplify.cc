@@ -1,5 +1,6 @@
 #include "simplify.h"
 #include "node_util.h"
+#include "../../eqmaps/eqmaps.h"
 #include <iostream>
 #include <assert.h>
 
@@ -16,6 +17,21 @@ namespace simplify {
 
     if (node->right)
       simplifyNode(node->right);
+
+    if (node->token.type == TOKEN_TYPE::BINARY_OP)
+      simplifyBinaryOp(node);
+
+  }
+
+  void simplifyBinaryOp(Node *node){
+    if (node_util::isNum(node->left) && node_util::isNum(node->right)){
+      float a = node_util::getNum(node->right);
+      float b = node_util::getNum(node->left);
+      string res = node_util::doubleToString(EqMaps::bin_maps[node->token.value](b, a));
+      node->token = Token(TOKEN_TYPE::NUM, res);
+      node_util::deleteChildren(node);
+      return;
+    }
 
     if (node->token.value == string("+")){
       simplifyPlus(node);
@@ -62,10 +78,7 @@ namespace simplify {
     }
 
     if (node_util::isZero(node->right) || node_util::isZero(node->left)){
-      node_util::deleteTree(node->left);
-      node_util::deleteTree(node->right);
-      node->left = nullptr;
-      node->right = nullptr;
+      node_util::deleteChildren(node);
       node->token = Token(TOKEN_TYPE::NUM, string("0"));
       return;
     }
@@ -81,10 +94,7 @@ namespace simplify {
     }
 
     if (node_util::isZero(node->right)){
-      node_util::deleteTree(node->left);
-      node_util::deleteTree(node->right);
-      node->left = nullptr;
-      node->right = nullptr;
+      node_util::deleteChildren(node);
       node->token = Token(TOKEN_TYPE::NUM, string("1"));
       return;
     }

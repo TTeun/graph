@@ -7,6 +7,7 @@ namespace simplify {
 
   typedef ExpTree::Node Node;
   void simplifyNode(Node *node);
+  void simplifyBinaryOp(Node *node);
   void simplifyPlus(Node *node);
   void simplifyMul(Node *node);
   void simplifyPow(Node *node);

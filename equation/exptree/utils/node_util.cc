@@ -1,5 +1,6 @@
 #include "node_util.h"
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -77,6 +78,13 @@ namespace node_util{
     return;
   }
 
+  void deleteChildren(Node *node){
+    deleteTree(node->right);
+    deleteTree(node->left);
+    node->left = nullptr;
+    node->right =nullptr;
+  }
+
   void deleteTree(Node *node){
     if (node->left)
       deleteTree(node->left);
@@ -87,5 +95,10 @@ namespace node_util{
     delete node;
   }
 
+  string doubleToString(double a){
+    ostringstream ostr;
+    ostr << a;
+    return ostr.str();
+  }
 
 }

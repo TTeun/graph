@@ -36,14 +36,10 @@ namespace diff{
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Node* diffPow(Node *node){
     if (node_util::isNum(node->right)){
-      ostringstream str1, str2;
-      str1 << node_util::getNum(node->right) - 1;
-      str2 << node_util::getNum(node->right);
-
       Node *right = node_util::copyNode(node);
-      right->right->token.value = str1.str();
+      right->right->token.value = node_util::doubleToString(node_util::getNum(node->right) - 1);
 
-      return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, node_util::newNode(Token(TOKEN_TYPE::NUM, str2.str()), nullptr, nullptr));
+      return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, node_util::newNode(Token(TOKEN_TYPE::NUM, node_util::doubleToString(node_util::getNum(node->right))), nullptr, nullptr));
     }
     return nullptr;
   }

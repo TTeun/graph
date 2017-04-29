@@ -1,5 +1,4 @@
 #include "exptree.h"
-#include <sstream>
 #include <map>
 #include <iostream>
 #include <stack>
