@@ -77,5 +77,15 @@ namespace node_util{
     return;
   }
 
+  void deleteTree(Node *node){
+    if (node->left)
+      deleteTree(node->left);
+
+    if (node->right)
+      deleteTree(node->right);
+
+    delete node;
+  }
+
 
 }

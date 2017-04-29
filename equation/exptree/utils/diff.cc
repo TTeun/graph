@@ -93,7 +93,7 @@ namespace diff{
         break;
 
       case TOKEN_TYPE::VAR:
-        return new Node(Token(TOKEN_TYPE::VAR, string("1")));
+        return new Node(Token(TOKEN_TYPE::NUM, string("1")));
         break;
 
       case TOKEN_TYPE::BINARY_OP:

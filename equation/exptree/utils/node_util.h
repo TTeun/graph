@@ -17,6 +17,7 @@ namespace node_util {
   bool isNum(Node *node);
   bool isTerminalNum(Node *node);
   double getNum(Node *node);
+  void deleteTree(Node *node);
 }
 
 #endif

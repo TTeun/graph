@@ -9,6 +9,7 @@ namespace simplify {
   void simplifyNode(Node *node);
   void simplifyPlus(Node *node);
   void simplifyMul(Node *node);
+  void simplifyPow(Node *node);
 }
 
 #endif
