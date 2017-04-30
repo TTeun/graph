@@ -24,7 +24,7 @@ namespace diff {
 
   std::unique_ptr<Node> numNode(std::string &&  str);
 
-};
+}
 
 
 #endif

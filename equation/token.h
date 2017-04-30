@@ -16,6 +16,7 @@ struct Token {
   Token();
   Token(TOKEN_TYPE _type, std::string &&str);
   Token(TOKEN_TYPE _type, std::string const &str);
+  Token(TOKEN_TYPE _type, char const * a);
   TOKEN_TYPE type = TOKEN_TYPE::NONE;
   std::string value{};
 

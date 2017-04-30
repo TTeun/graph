@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stack>
 #include "../eqmaps/eqmaps.h"
-// #include "utils/diff.h"
+#include "utils/diff.h"
 #include "utils/node_util.h"
 #include "utils/simplify.h"
 
@@ -20,7 +20,6 @@ void ExpTree::setTree(queue<Token> *token_queue){
   Node *node = new Node;
   stack<Node*> *n_stack = new stack<Node*>;
   Token current;
-  bool paren_mismatch;
   while (not token_queue->empty())
   {
     current = token_queue->front();

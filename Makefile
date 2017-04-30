@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g -std=c++14 -Wall #	-Werror
+CFLAGS = -g -std=c++14 -Wall -Werror -pedantic
 
 all: graph
 

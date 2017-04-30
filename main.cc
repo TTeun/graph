@@ -1,8 +1,8 @@
-// #include "equation/expression/expression.h"
 #include "equation/exptree/exptree.h"
 #include "equation/parser/parser.h"
 #include <string>
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
@@ -12,7 +12,7 @@ int main(){
 
   string test;
   getline(cin, test);
-  ExpTree *exp_tree = new ExpTree;
+  unique_ptr<ExpTree> exp_tree(new ExpTree);
   while (test != string("q")){
     switch (test[0]) {
       case 'e':
@@ -33,5 +33,4 @@ int main(){
         break;
     }
   }
-  delete exp_tree;
 }

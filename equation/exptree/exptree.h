@@ -26,6 +26,10 @@ public:
     Node(TOKEN_TYPE type, std::string &&str)
       : token(type, str)
     {}
+    Node(TOKEN_TYPE type, char const * a)
+      : token(type, a)
+    {}
+
 
     Token token;
     std::unique_ptr<Node> left = nullptr;
