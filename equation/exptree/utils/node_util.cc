@@ -7,33 +7,33 @@ using namespace std;
 namespace node_util{
 
   unique_ptr<Node> newNode(Token const &token, unique_ptr<Node> &right, unique_ptr<Node> &left){
-    unique_ptr<Node> new_node = unique_ptr<Node>(new Node(token));
+    auto new_node = make_unique<Node>(token);
     new_node->left = move(left);
     new_node->right = move(right);
     return new_node;
   }
 
   unique_ptr<Node> newNode(Token const &token, unique_ptr<Node> &&right, unique_ptr<Node> &&left){
-    unique_ptr<Node> new_node = unique_ptr<Node>(new Node(token));
+    auto new_node = make_unique<Node>(token);
     new_node->left = move(left);
     new_node->right = move(right);
     return new_node;
   }
 
   unique_ptr<Node> newNode(Token const &token, unique_ptr<Node> &right){
-    unique_ptr<Node> new_node = unique_ptr<Node>(new Node(token));
+    auto new_node = make_unique<Node>(token);
     new_node->right = move(right);
     return new_node;
   }
 
   unique_ptr<Node> newNode(Token const &token, unique_ptr<Node> &&right){
-    unique_ptr<Node> new_node = unique_ptr<Node>(new Node(token));
+    auto new_node = make_unique<Node>(token);
     new_node->right = move(right);
     return new_node;
   }
 
   unique_ptr<Node> cpyNode(unique_ptr<Node> &node){
-    unique_ptr<Node> new_node(new Node(node->token));
+    auto new_node(make_unique<Node>(node->token));
     if (node->left)
       new_node->left = cpyNode(node->left);
 

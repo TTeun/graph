@@ -17,8 +17,8 @@ ExpTree::ExpTree(queue<Token> *token_queue)
 }
 
 void ExpTree::setTree(queue<Token> *token_queue){
-  Node *node = new Node;
-  stack<Node*> *n_stack = new stack<Node*>;
+  auto node = new Node;
+  auto n_stack = new stack<Node*>;
   Token current;
   while (not token_queue->empty())
   {
@@ -74,7 +74,7 @@ void ExpTree::simplify(){
 
 void ExpTree::differentiate(){
   dif_tree = diff::differentiateNode(exp_tree);
-  // simplify::simplifyNode(dif_tree);
+  simplify::simplifyNode(dif_tree);
 }
 
 void ExpTree::printTree(){
