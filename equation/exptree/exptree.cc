@@ -12,20 +12,23 @@ using namespace node_util;
 
 ExpTree::ExpTree(){}
 
-ExpTree::ExpTree(std::queue<Token> *token_queue)
+ExpTree::ExpTree(queue<Token> *token_queue)
 {
+  setTree(token_queue);
+}
 
+void ExpTree::setTree(queue<Token> *token_queue){
   Node *node = new Node;
   stack<Node*> *n_stack = new stack<Node*>;
   Token current;
-
+  bool paren_mismatch;
   while (not token_queue->empty())
   {
     current = token_queue->front();
     token_queue->pop();
     switch (current.type) {
       case TOKEN_TYPE::BRA:
-        // paren_mismatch = true;
+        paren_mismatch = true;
         break;
       case TOKEN_TYPE::NUM:
         node->token = current;
@@ -58,6 +61,7 @@ ExpTree::ExpTree(std::queue<Token> *token_queue)
     }
   }
   delete node; // We do not need a new node anymore
+  delete token_queue;
   exp_tree = n_stack->top();
   delete n_stack;
   simplify();
@@ -78,6 +82,9 @@ void ExpTree::differentiate(){
 }
 
 void ExpTree::clearNode(Node *node){
+  if (not node)
+    return;
+
   if (node->left)
     clearNode(node->left);
   if (node->right)
@@ -105,4 +112,8 @@ void ExpTree::printTreeInternal(Node *node){
     printTreeInternal(node->right);
   }
   cout << ")";
+}
+
+void ExpTree::clearTree(){
+  clearNode(exp_tree);
 }

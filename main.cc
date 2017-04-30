@@ -1,24 +1,37 @@
-#include "equation/expression/expression.h"
+// #include "equation/expression/expression.h"
 #include "equation/exptree/exptree.h"
 #include "equation/parser/parser.h"
 #include <string>
-#include <queue>
-#include <stack>
-#include <cmath>
+#include <iostream>
 
 using namespace std;
 
 int main(){
+
+  cout << "Welcome to the diff tool!\n";
+
   string test;
   getline(cin, test);
-
-  Expression *e(Parser::parse_input(&test));
-  // e->printQueue();
-
-  ExpTree *exp_tree = new ExpTree(e->q());
-  exp_tree->printTree();
-  exp_tree->differentiate();
-  exp_tree->printDif();
+  ExpTree *exp_tree = new ExpTree;
+  while (test != string("q")){
+    switch (test[0]) {
+      case 'e':
+        getline(cin, test);
+        exp_tree->clearTree();
+        exp_tree->setTree(Parser::parse_input(&test));
+        exp_tree->printTree();
+        getline(cin, test);
+        break;
+      case 'd':
+        exp_tree->differentiate();
+        exp_tree->printDif();
+        getline(cin, test);
+        break;
+      default:
+        cout << "No command\n";
+        getline(cin, test);
+        break;
+    }
+  }
   delete exp_tree;
-  delete e;
 }

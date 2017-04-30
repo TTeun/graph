@@ -33,10 +33,12 @@ private:
   void printTreeInternal(Node *node);
 
 public:
+  void setTree(std::queue<Token> *token_queue);
   void printTree();
   void printDif();
   void simplify();
   void differentiate();
+  void clearTree();
 
 };
 

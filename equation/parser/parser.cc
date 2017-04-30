@@ -207,7 +207,7 @@ bool Parser::get_next_token(
   }
 }
 
-Expression *Parser::parse_input(string *input){
+queue<Token> *Parser::parse_input(string *input){
 
   vector<Token> tokens;
   Token token;
@@ -229,9 +229,8 @@ Expression *Parser::parse_input(string *input){
   if (not parser_error)
     return to_queue(tokens);
 
-  Expression *e = new Expression;
-  e->setState( "Parser error after: \n" + input->substr(0, str_position) + '\n');
-  return e;
+  cout << "Parser error after: \n" + input->substr(0, str_position) + '\n';
+  return nullptr;
 }
 
 void handleOp(queue<Token> *out_queue, stack<Token> &op_stack, Token &tk, unordered_map<string, OpInfo> &info){
@@ -283,7 +282,7 @@ bool emptyQueue(queue<Token> *out_queue, stack<Token> &op_stack){
 }
 
 
-Expression *Parser::to_queue(vector<Token> &token_list){
+queue<Token> *Parser::to_queue(vector<Token> &token_list){
   static unordered_map<string, OpInfo> info =
     {
       {"+", OpInfo(2, "L")},
@@ -337,12 +336,9 @@ Expression *Parser::to_queue(vector<Token> &token_list){
     if (paren_mismatch)
       break;
   }
-
+  delete variables; // variables willl need to be used at some point
   paren_mismatch = not emptyQueue(out_queue, op_stack);
 
-  Expression *e = new Expression(out_queue, variables);
-  if (paren_mismatch)
-    e->setState(string("Mismatched parenthesis\n"));
+  return out_queue;
 
-  return e;
 }
