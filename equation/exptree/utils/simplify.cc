@@ -5,11 +5,12 @@
 #include <assert.h>
 
 using namespace std;
+using namespace node_util;
 
 namespace simplify {
 
   void simplifyNode(Node *node){
-    if (node_util::isNum(node) || node_util::isVar(node))
+    if (isNum(node) || isVar(node))
       return;
 
     if (node->left)
@@ -24,12 +25,10 @@ namespace simplify {
   }
 
   void simplifyBinaryOp(Node *node){
-    if (node_util::isNum(node->left) && node_util::isNum(node->right)){
-      float a = node_util::getNum(node->right);
-      float b = node_util::getNum(node->left);
-      string res = node_util::doubleToString(EqMaps::bin_maps[node->token.value](b, a));
+    if (isNum(node->left) && isNum(node->right)){
+      string res = doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left), getNum(node->right)));
       node->token = Token(TOKEN_TYPE::NUM, res);
-      node_util::deleteChildren(node);
+      deleteChildren(node);
       return;
     }
 
@@ -52,52 +51,49 @@ namespace simplify {
   void simplifyPlus(Node *node){
     assert(node->token.value == string("+"));
 
-    if (node_util::isZero(node->left)){
-      node_util::copyChild(node, node->right, node->left);
+    if (isZero(node->left)){
+      copyChild(node, node->right, node->left);
       return;
     }
 
-    if (node_util::isZero(node->right)){
-      node_util::copyChild(node, node->left, node->right);
+    if (isZero(node->right)){
+      copyChild(node, node->left, node->right);
       return;
     }
-    return;
   }
 
   void simplifyMul(Node *node){
     assert(node->token.value == string("*"));
 
-    if (node_util::isOne(node->left)){
-      node_util::copyChild(node, node->right, node->left);
+    if (isOne(node->left)){
+      copyChild(node, node->right, node->left);
       return;
     }
 
-    if (node_util::isOne(node->right)){
-      node_util::copyChild(node, node->left, node->right);
+    if (isOne(node->right)){
+      copyChild(node, node->left, node->right);
       return;
     }
 
-    if (node_util::isZero(node->right) || node_util::isZero(node->left)){
-      node_util::deleteChildren(node);
+    if (isZero(node->right) || isZero(node->left)){
+      deleteChildren(node);
       node->token = Token(TOKEN_TYPE::NUM, string("0"));
       return;
     }
-    return;
   }
 
   void simplifyPow(Node *node){
     assert(node->token.value == string("^"));
     assert(node->right->token.type == TOKEN_TYPE::NUM);
-    if (node_util::isOne(node->right)){
-      node_util::copyChild(node, node->left, node->right);
+    if (isOne(node->right)){
+      copyChild(node, node->left, node->right);
       return;
     }
 
-    if (node_util::isZero(node->right)){
-      node_util::deleteChildren(node);
+    if (isZero(node->right)){
+      deleteChildren(node);
       node->token = Token(TOKEN_TYPE::NUM, string("1"));
       return;
     }
-    return;
   }
 }

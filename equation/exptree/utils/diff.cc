@@ -6,7 +6,8 @@
 
 using namespace std;
 
-namespace diff{
+
+namespace diff {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   Node* diffPlus(Node *node){
     return node_util::newNode(node->token, differentiateNode(node->right), differentiateNode(node->left));
