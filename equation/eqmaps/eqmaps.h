@@ -15,12 +15,12 @@ public:
   static map_bin bin_maps;
   static map_un un_maps;
 
-  // 
-  // typedef ExpTree::Node Node;
-  // typedef Node* (*f_diff_bin)(Node * node);
-  // typedef std::unordered_map<std::string, f_diff_bin> map_bin_diff;
-  //
-  // static map_bin_diff bin_diff_maps;
+
+  typedef ExpTree::Node Node;
+  typedef std::unique_ptr<Node> (*f_diff_bin)(std::unique_ptr<Node> &node);
+  typedef std::unordered_map<std::string, f_diff_bin> map_bin_diff;
+
+  static map_bin_diff bin_diff_maps;
 };
 
 #endif

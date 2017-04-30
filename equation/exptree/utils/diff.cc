@@ -6,91 +6,96 @@
 
 using namespace std;
 
-
 namespace diff {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  Node* diffPlus(Node *node){
-    return node_util::newNode(node->token, differentiateNode(node->right), differentiateNode(node->left));
+  unique_ptr<Node> diffPlus(unique_ptr<Node> &node){
+
+    unique_ptr<Node> ptr = node_util::newNode(node->token, move(differentiateNode(node->right)), differentiateNode(node->left));
+    return ptr;
   }
 
   // --------------------------------------------------------------------
-  Node* diffMin(Node *node){
+  unique_ptr<Node> diffMin(unique_ptr<Node> &node){
     return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("-")), differentiateNode(node->right), differentiateNode(node->left));
   }
 
   // ********************************************************************
-  Node* diffMul(Node *node){
-    Node *left = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::copyNode(node->right), differentiateNode(node->left));
-    Node *right = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), differentiateNode(node->right), node_util::copyNode(node->left));
+  unique_ptr<Node> diffMul(unique_ptr<Node> &node){
+    unique_ptr<Node> left = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::cpyNode(node->right), differentiateNode(node->left));
+    unique_ptr<Node> right = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), differentiateNode(node->right), node_util::cpyNode(node->left));
     return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("+")), right, left);
   }
 
   // /////////////////////////////////////////////////////////////////////
-  Node *diffDiv(Node *node){
-    Node *f_dash_g = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::copyNode(node->right), differentiateNode(node->left));
-    Node *g_dash_f = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), differentiateNode(node->right), node_util::copyNode(node->left));
-    Node *num      = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("-")), g_dash_f, f_dash_g);
-    Node *den      = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("^")), numNode(string("2")), node_util::copyNode(node->right));
+  unique_ptr<Node> diffDiv(unique_ptr<Node> &node){
+    unique_ptr<Node> f_dash_g = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::cpyNode(node->right), differentiateNode(node->left));
+    unique_ptr<Node> g_dash_f = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), differentiateNode(node->right), node_util::cpyNode(node->left));
+    unique_ptr<Node> num      = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("-")), g_dash_f, f_dash_g);
+    unique_ptr<Node> den      = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("^")), numNode(string("2")), node_util::cpyNode(node->right));
     return           node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("/")), den, num);
   }
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Node* diffPow(Node *node){
+  unique_ptr<Node> diffPow(unique_ptr<Node> &node){
     if (node_util::isNum(node->right)){
-      Node *right = node_util::copyNode(node);
+      unique_ptr<Node> right = node_util::cpyNode(node);
       right->right->token.value = node_util::doubleToString(node_util::getNum(node->right) - 1);
-
-      return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, node_util::newNode(Token(TOKEN_TYPE::NUM, node_util::doubleToString(node_util::getNum(node->right))), nullptr, nullptr));
+      unique_ptr<Node> new_node(new Node(Token(TOKEN_TYPE::BINARY_OP, string("*"))));
+      new_node->right = move(right);
+      unique_ptr<Node> left(new Node(TOKEN_TYPE::BINARY_OP, node_util::doubleToString(node_util::getNum(node->right))));
+      new_node->left = move(left);
+      return new_node;
     }
     return nullptr;
   }
 
 
   // sinsinsinsinsinsinsinsinsinsinsinsinsinsinsinsinsinsinsinsinsinsin
-  Node *diffSin(Node *node){
-    Node *new_node = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::copyNode(node), differentiateNode(node->right));
+  unique_ptr<Node> diffSin(unique_ptr<Node> &node){
+    unique_ptr<Node> new_node = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::cpyNode(node), differentiateNode(node->right));
     new_node->right->token.value = string("cos");
     return new_node;
   }
 
   // coscoscoscoscoscoscoscoscoscoscoscoscoscoscoscoscoscoscoscoscoscos
-  Node *diffCos(Node *node){
-    Node *sin_node = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::copyNode(node), differentiateNode(node->right));
+  unique_ptr<Node> diffCos(unique_ptr<Node> &node){
+    unique_ptr<Node> sin_node = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::cpyNode(node), differentiateNode(node->right));
     sin_node->right->token.value = string("sin");
 
     return node_util::newNode(Token(TOKEN_TYPE::UNARY_OP, string("-u")), sin_node);
   }
 
   // expexpexpexpexpexpexpexpexpexpexpexpexpexpexpexpexpexpexpexpexpexp
-  Node* diffExp(Node *node){
-    return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::copyNode(node), differentiateNode(node->right));
+  unique_ptr<Node> diffExp(unique_ptr<Node> &node){
+    return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), node_util::cpyNode(node), differentiateNode(node->right));
   }
 
   // -u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u-u
-  Node* diffUnaryMinus(Node *node){
-    Node *new_node = new Node(Token(TOKEN_TYPE::UNARY_OP, string("-u")));
+  unique_ptr<Node> diffUnaryMinus(unique_ptr<Node> &node){
+    unique_ptr<Node> new_node(new Node(Token(TOKEN_TYPE::UNARY_OP, string("-u"))));
     new_node = differentiateNode(node->right);
     return new_node;
   }
 
   // loglogloglogloglogloglogloglogloglogloglogloglogloglogloglogloglog
-  Node *diffLog(Node *node){
-    Node* right = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("/")), node_util::copyNode(node->right), numNode(string("1")));
-    return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, differentiateNode(node->right));
+  unique_ptr<Node> diffLog(unique_ptr<Node> &node){
+    unique_ptr<Node> right = node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("/")), node_util::cpyNode(node->right), numNode(string("1")));
+    unique_ptr<Node> left = differentiateNode(node->right);
+    return node_util::newNode(Token(TOKEN_TYPE::BINARY_OP, string("*")), right, left);
   }
 
-  Node *numNode(string &&str){
+  unique_ptr<Node> numNode(string &&str){
     return node_util::newNode(Token(TOKEN_TYPE::NUM, str), nullptr, nullptr);
   }
 
-  Node *differentiateNode(Node *node){
+  unique_ptr<Node> differentiateNode(unique_ptr<Node> &node){
     switch (node->token.type) {
       case TOKEN_TYPE::NUM:
-        return new Node(Token(TOKEN_TYPE::NUM, string("0")));
+        return unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, string("0"))));
         break;
 
       case TOKEN_TYPE::VAR:
-        return new Node(Token(TOKEN_TYPE::NUM, string("1")));
+        return unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, string("1"))));
         break;
 
       case TOKEN_TYPE::BINARY_OP:

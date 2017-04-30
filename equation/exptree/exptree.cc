@@ -74,7 +74,7 @@ void ExpTree::simplify(){
 }
 
 void ExpTree::differentiate(){
-  // dif_tree = diff::differentiateNode(exp_tree);
+  dif_tree = diff::differentiateNode(exp_tree);
   // simplify::simplifyNode(dif_tree);
 }
 

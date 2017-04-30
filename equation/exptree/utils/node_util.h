@@ -7,9 +7,12 @@
 namespace node_util {
   typedef ExpTree::Node Node;
 
-  Node* copyNode(std::unique_ptr<Node> &node);
+  std::unique_ptr<Node> cpyNode(std::unique_ptr<Node> &node);
 
-  std::unique_ptr<Node> &ewNode(Token const &token, std::unique_ptr<Node> &right, std::unique_ptr<Node> &left);
+  std::unique_ptr<Node> newNode(Token const &token, std::unique_ptr<Node> &right, std::unique_ptr<Node> &left);
+  std::unique_ptr<Node> newNode(Token const &token, std::unique_ptr<Node> &&right, std::unique_ptr<Node> &&left);
+  std::unique_ptr<Node> newNode(Token const &token, std::unique_ptr<Node> &right);
+  std::unique_ptr<Node> newNode(Token const &token, std::unique_ptr<Node> &&right);
   bool isZero(std::unique_ptr<Node> &node);
   bool isOne(std::unique_ptr<Node> &node);
   bool isVar(std::unique_ptr<Node> &node);

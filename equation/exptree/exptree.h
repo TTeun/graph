@@ -20,6 +20,12 @@ public:
     Node(Token &&_token){
       token = _token;
     }
+    Node(TOKEN_TYPE type, std::string &str)
+      : token(type, str)
+    {}
+    Node(TOKEN_TYPE type, std::string &&str)
+      : token(type, str)
+    {}
 
     Token token;
     std::unique_ptr<Node> left = nullptr;
