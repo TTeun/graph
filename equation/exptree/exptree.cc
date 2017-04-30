@@ -3,12 +3,11 @@
 #include <iostream>
 #include <stack>
 #include "../eqmaps/eqmaps.h"
-#include "utils/diff.h"
+// #include "utils/diff.h"
 #include "utils/node_util.h"
 #include "utils/simplify.h"
 
 using namespace std;
-using namespace node_util;
 
 ExpTree::ExpTree(){}
 
@@ -28,7 +27,7 @@ void ExpTree::setTree(queue<Token> *token_queue){
     token_queue->pop();
     switch (current.type) {
       case TOKEN_TYPE::BRA:
-        paren_mismatch = true;
+        cout << "paren_mismatch somehow?\n";
         break;
       case TOKEN_TYPE::NUM:
         node->token = current;
@@ -41,16 +40,16 @@ void ExpTree::setTree(queue<Token> *token_queue){
         node = new Node;
         break;
       case TOKEN_TYPE::BINARY_OP:
-        node->right = n_stack->top();
+        node->right = unique_ptr<Node> (n_stack->top());
         n_stack->pop();
-        node->left = n_stack->top();
+        node->left = unique_ptr<Node> (n_stack->top());
         n_stack->pop();
         node->token = current;
         n_stack->push(node);
         node = new Node;
         break;
       case TOKEN_TYPE::UNARY_OP:
-        node->right = n_stack->top();
+        node->right = unique_ptr<Node> (n_stack->top());
         n_stack->pop();
         node->token = current;
         n_stack->push(node);
@@ -62,14 +61,12 @@ void ExpTree::setTree(queue<Token> *token_queue){
   }
   delete node; // We do not need a new node anymore
   delete token_queue;
-  exp_tree = n_stack->top();
+  exp_tree = unique_ptr<Node>(n_stack->top());
   delete n_stack;
   simplify();
 }
 
 ExpTree::~ExpTree(){
-  clearNode(exp_tree);
-  clearNode(dif_tree);
 }
 
 void ExpTree::simplify(){
@@ -77,19 +74,8 @@ void ExpTree::simplify(){
 }
 
 void ExpTree::differentiate(){
-  dif_tree = diff::differentiateNode(exp_tree);
-  simplify::simplifyNode(dif_tree);
-}
-
-void ExpTree::clearNode(Node *node){
-  if (not node)
-    return;
-
-  if (node->left)
-    clearNode(node->left);
-  if (node->right)
-    clearNode(node->right);
-  delete node;
+  // dif_tree = diff::differentiateNode(exp_tree);
+  // simplify::simplifyNode(dif_tree);
 }
 
 void ExpTree::printTree(){
@@ -102,7 +88,7 @@ void ExpTree::printDif(){
   cout << '\n';
 }
 
-void ExpTree::printTreeInternal(Node *node){
+void ExpTree::printTreeInternal(std::unique_ptr<Node> &node){
   cout << "(";
   if (node->left){
     printTreeInternal(node->left);
@@ -115,5 +101,5 @@ void ExpTree::printTreeInternal(Node *node){
 }
 
 void ExpTree::clearTree(){
-  clearNode(exp_tree);
+  exp_tree = nullptr;
 }

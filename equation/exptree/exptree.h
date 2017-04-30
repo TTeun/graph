@@ -3,7 +3,7 @@
 
 // #include "../expression/expression.h"
 #include <queue>
-#include <vector>
+#include <memory>
 #include "../token.h"
 
 class ExpTree {
@@ -22,15 +22,15 @@ public:
     }
 
     Token token;
-    Node *left = nullptr;
-    Node *right = nullptr;
+    std::unique_ptr<Node> left = nullptr;
+    std::unique_ptr<Node> right = nullptr;
   };
 private:
-  Node *exp_tree = nullptr;
-  Node *dif_tree = nullptr;
+  std::unique_ptr<Node> exp_tree = nullptr;
+  std::unique_ptr<Node> dif_tree = nullptr;
 
-  void clearNode(Node *node);
-  void printTreeInternal(Node *node);
+  void clearNode(std::unique_ptr<Node> &node);
+  void printTreeInternal(std::unique_ptr<Node> &node);
 
 public:
   void setTree(std::queue<Token> *token_queue);

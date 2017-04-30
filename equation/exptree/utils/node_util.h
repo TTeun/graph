@@ -7,18 +7,15 @@
 namespace node_util {
   typedef ExpTree::Node Node;
 
-  Node* copyNode(Node *node);
-  void copyChild(Node *node, Node *child_to_copy, Node *other);
+  Node* copyNode(std::unique_ptr<Node> &node);
 
-  Node *newNode(Token const &token, Node *right, Node *left = nullptr);
-  bool isZero(Node *node);
-  bool isOne(Node *node);
-  bool isVar(Node *node);
-  bool isNum(Node *node);
-  bool isTerminalNum(Node *node);
-  double getNum(Node *node);
-  void deleteTree(Node *node);
-  void deleteChildren(Node *node);
+  std::unique_ptr<Node> &ewNode(Token const &token, std::unique_ptr<Node> &right, std::unique_ptr<Node> &left);
+  bool isZero(std::unique_ptr<Node> &node);
+  bool isOne(std::unique_ptr<Node> &node);
+  bool isVar(std::unique_ptr<Node> &node);
+  bool isNum(std::unique_ptr<Node> &node);
+  bool isTerminalNum(std::unique_ptr<Node> &node);
+  double getNum(std::unique_ptr<Node> &node);
   std::string doubleToString(double a);
 }
 

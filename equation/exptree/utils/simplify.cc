@@ -9,7 +9,7 @@ using namespace node_util;
 
 namespace simplify {
 
-  void simplifyNode(Node *node){
+  void simplifyNode(unique_ptr<Node> &node){
     if (isNum(node) || isVar(node))
       return;
 
@@ -24,11 +24,9 @@ namespace simplify {
 
   }
 
-  void simplifyBinaryOp(Node *node){
+  void simplifyBinaryOp(unique_ptr<Node> &node){
     if (isNum(node->left) && isNum(node->right)){
-      string res = doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left), getNum(node->right)));
-      node->token = Token(TOKEN_TYPE::NUM, res);
-      deleteChildren(node);
+      node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left), getNum(node->right))))));
       return;
     }
 
@@ -48,51 +46,49 @@ namespace simplify {
     }
   }
 
-  void simplifyPlus(Node *node){
+  void simplifyPlus(unique_ptr<Node> &node){
     assert(node->token.value == string("+"));
 
     if (isZero(node->left)){
-      copyChild(node, node->right, node->left);
+      node = move(node->right);
       return;
     }
 
     if (isZero(node->right)){
-      copyChild(node, node->left, node->right);
+      node = move(node->left);
       return;
     }
   }
 
-  void simplifyMul(Node *node){
+  void simplifyMul(unique_ptr<Node> &node){
     assert(node->token.value == string("*"));
 
     if (isOne(node->left)){
-      copyChild(node, node->right, node->left);
+      node = move(node->right);
       return;
     }
 
     if (isOne(node->right)){
-      copyChild(node, node->left, node->right);
+      node = move(node->left);
       return;
     }
 
     if (isZero(node->right) || isZero(node->left)){
-      deleteChildren(node);
-      node->token = Token(TOKEN_TYPE::NUM, string("0"));
+      node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, string("0"))));
       return;
     }
   }
 
-  void simplifyPow(Node *node){
+  void simplifyPow(unique_ptr<Node> &node){
     assert(node->token.value == string("^"));
     assert(node->right->token.type == TOKEN_TYPE::NUM);
     if (isOne(node->right)){
-      copyChild(node, node->left, node->right);
+      node = move(node->left);
       return;
     }
 
     if (isZero(node->right)){
-      deleteChildren(node);
-      node->token = Token(TOKEN_TYPE::NUM, string("1"));
+      node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, string("1"))));
       return;
     }
   }
