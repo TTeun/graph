@@ -88,7 +88,8 @@ void ExpTree::printDif(){
 }
 
 void ExpTree::printTreeInternal(std::unique_ptr<Node> &node){
-  cout << "(";
+  if (not node_util::isNum(node.get()) && not node_util::isVar(node.get()))
+    cout << "(";
   if (node->left){
     printTreeInternal(node->left);
   }
@@ -96,7 +97,8 @@ void ExpTree::printTreeInternal(std::unique_ptr<Node> &node){
   if (node->right){
     printTreeInternal(node->right);
   }
-  cout << ")";
+  if (not node_util::isNum(node.get()) && not node_util::isVar(node.get()))
+    cout << ")";
 }
 
 void ExpTree::clearTree(){

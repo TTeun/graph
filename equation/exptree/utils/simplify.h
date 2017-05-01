@@ -7,11 +7,14 @@
 namespace simplify {
 
   typedef ExpTree::Node Node;
-  void simplifyNode(std::unique_ptr<Node> &node);
-  void simplifyBinaryOp(std::unique_ptr<Node> &node);
-  void simplifyPlus(std::unique_ptr<Node> &node);
-  void simplifyMul(std::unique_ptr<Node> &node);
-  void simplifyPow(std::unique_ptr<Node> &node);
+  typedef std::unique_ptr<Node> u_node;
+  void simplifyNode(u_node &node);
+  void simplifyBinaryOp(u_node &node);
+  void simplifyUnaryOp(u_node &node);
+  void simplifyPlus(u_node &node);
+  void simplifyMul(u_node &node);
+  void simplifyPow(u_node &node);
+  void simplifyDiv(u_node &node);
 }
 
 #endif

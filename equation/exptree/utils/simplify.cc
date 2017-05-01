@@ -9,7 +9,7 @@ using namespace node_util;
 
 namespace simplify {
 
-  void simplifyNode(unique_ptr<Node> &node){
+  void simplifyNode(u_node &node){
     if (isNum(node.get()) || isVar(node.get()))
       return;
 
@@ -22,11 +22,14 @@ namespace simplify {
     if (node->token.type == TOKEN_TYPE::BINARY_OP)
       simplifyBinaryOp(node);
 
+    if (node->token.type == TOKEN_TYPE::UNARY_OP)
+      simplifyUnaryOp(node);
+
   }
 
-  void simplifyBinaryOp(unique_ptr<Node> &node){
+  void simplifyBinaryOp(u_node &node){
     if (isNum(node->left.get()) && isNum(node->right.get())){
-      node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left.get()), getNum(node->right.get()))))));
+      node = u_node(new Node(Token(TOKEN_TYPE::NUM, doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left.get()), getNum(node->right.get()))))));
       return;
     }
 
@@ -44,9 +47,22 @@ namespace simplify {
       simplifyPow(node);
       return;
     }
+
+    if (node->token.value == string("/")){
+      simplifyDiv(node);
+      return;
+    }
+
   }
 
-  void simplifyPlus(unique_ptr<Node> &node){
+  void simplifyUnaryOp(u_node &node){
+    if (isNum(node->right.get())){
+      node = u_node(new Node(Token(TOKEN_TYPE::NUM, doubleToString(EqMaps::un_maps[node->token.value](getNum(node->right.get()))))));
+      return;
+    }
+  }
+
+  void simplifyPlus(u_node &node){
     assert(node->token.value == string("+"));
 
     if (isZero(node->left.get())){
@@ -60,7 +76,7 @@ namespace simplify {
     }
   }
 
-  void simplifyMul(unique_ptr<Node> &node){
+  void simplifyMul(u_node &node){
     assert(node->token.value == string("*"));
 
     if (isOne(node->left.get())){
@@ -74,12 +90,12 @@ namespace simplify {
     }
 
     if (isZero(node->right.get()) || isZero(node->left.get())){
-      node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, string("0"))));
+      node = u_node(new Node(Token(TOKEN_TYPE::NUM, string("0"))));
       return;
     }
   }
 
-  void simplifyPow(unique_ptr<Node> &node){
+  void simplifyPow(u_node &node){
     assert(node->token.value == string("^"));
     assert(node->right->token.type == TOKEN_TYPE::NUM);
     if (isOne(node->right.get())){
@@ -88,8 +104,12 @@ namespace simplify {
     }
 
     if (isZero(node->right.get())){
-      node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, string("1"))));
+      node = u_node(new Node(Token(TOKEN_TYPE::NUM, string("1"))));
       return;
     }
+  }
+
+  void simplifyDiv(u_node &node){
+    return;
   }
 }

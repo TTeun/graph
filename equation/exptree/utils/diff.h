@@ -7,23 +7,22 @@
 namespace diff {
 
   typedef ExpTree::Node Node;
+  typedef std::unique_ptr<Node> u_node;
+  u_node differentiateNode(Node const *node);
 
-  std::unique_ptr<Node> differentiateNode(Node const *node);
+  u_node diffPlus(Node const *node);
+  u_node diffMin(Node const *node);
+  u_node diffMul(Node const *node);
+  u_node diffPow(Node const *node);
+  u_node diffDiv(Node const *node);
 
-  std::unique_ptr<Node> diffPlus(Node const *node);
-  std::unique_ptr<Node> diffMin(Node const *node);
-  std::unique_ptr<Node> diffMul(Node const *node);
-  std::unique_ptr<Node> diffPow(Node const *node);
-  std::unique_ptr<Node> diffDiv(Node const *node);
+  u_node diffUnaryMinus(Node const *node);
+  u_node diffSin(Node const *node);
+  u_node diffExp(Node const *node);
+  u_node diffCos(Node const *node);
+  u_node diffLog(Node const *node);
 
-  std::unique_ptr<Node> diffUnaryMinus(Node const *node);
-  std::unique_ptr<Node> diffSin(Node const *node);
-  std::unique_ptr<Node> diffExp(Node const *node);
-  std::unique_ptr<Node> diffCos(Node const *node);
-  std::unique_ptr<Node> diffLog(Node const *node);
-
-  std::unique_ptr<Node> numNode(std::string &&  str);
-
+  u_node numNode(std::string &&  str);
 }
 
 

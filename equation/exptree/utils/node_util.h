@@ -6,13 +6,13 @@
 
 namespace node_util {
   typedef ExpTree::Node Node;
+  typedef std::unique_ptr<Node> u_node;
+  u_node cpyNode(Node const *node);
 
-  std::unique_ptr<Node> cpyNode(Node const *node);
-
-  std::unique_ptr<Node> newNode(Token const &token, std::unique_ptr<Node> &right, std::unique_ptr<Node> &left);
-  std::unique_ptr<Node> newNode(Token const &token, std::unique_ptr<Node> &&right, std::unique_ptr<Node> &&left);
-  std::unique_ptr<Node> newNode(Token const &token, std::unique_ptr<Node> &right);
-  std::unique_ptr<Node> newNode(Token const &token, std::unique_ptr<Node> &&right);
+  u_node newNode(Token const &token, u_node &right, u_node &left);
+  u_node newNode(Token const &token, u_node &&right, u_node &&left);
+  u_node newNode(Token const &token, u_node &right);
+  u_node newNode(Token const &token, u_node &&right);
   bool isZero(Node const *node);
   bool isOne(Node const *node);
   bool isVar(Node const *node);
