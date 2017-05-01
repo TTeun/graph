@@ -32,38 +32,38 @@ namespace node_util{
     return new_node;
   }
 
-  unique_ptr<Node> cpyNode(unique_ptr<Node> &node){
+  unique_ptr<Node> cpyNode(Node const *node){
     auto new_node(make_unique<Node>(node->token));
     if (node->left)
-      new_node->left = cpyNode(node->left);
+      new_node->left = cpyNode(node->left.get());
 
     if (node->right)
-      new_node->right = cpyNode(node->right);
+      new_node->right = cpyNode(node->right.get());
 
     return new_node;
   }
 
-  bool isZero(unique_ptr<Node> &node){
+  bool isZero(Node const *node){
     return (node->token.type == TOKEN_TYPE::NUM && node->token.value == string("0"));
   }
 
-  bool isOne(unique_ptr<Node> &node){
+  bool isOne(Node const *node){
     return (node->token.type == TOKEN_TYPE::NUM && node->token.value == string("1"));
   }
 
-  bool isVar(unique_ptr<Node> &node){
+  bool isVar(Node const *node){
     return node->token.type == TOKEN_TYPE::VAR;
   }
 
-  bool isNum(unique_ptr<Node> &node){
+  bool isNum(Node const *node){
     return node->token.type == TOKEN_TYPE::NUM;
   }
 
-  bool isTerminalNum(unique_ptr<Node> &node){
+  bool isTerminalNum(Node const *node){
     return (not (node->left || node->right) && node->token.type == TOKEN_TYPE::NUM);
   }
 
-  double getNum(unique_ptr<Node> &node){
+  double getNum(Node const *node){
     return stod(node->token.value);
   }
 

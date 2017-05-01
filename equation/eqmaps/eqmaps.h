@@ -17,7 +17,7 @@ public:
 
 
   typedef ExpTree::Node Node;
-  typedef std::unique_ptr<Node> (*f_diff_bin)(std::unique_ptr<Node> &node);
+  typedef std::unique_ptr<Node> (*f_diff_bin)(Node const *node);
   typedef std::unordered_map<std::string, f_diff_bin> map_bin_diff;
 
   static map_bin_diff bin_diff_maps;

@@ -10,7 +10,7 @@ using namespace node_util;
 namespace simplify {
 
   void simplifyNode(unique_ptr<Node> &node){
-    if (isNum(node) || isVar(node))
+    if (isNum(node.get()) || isVar(node.get()))
       return;
 
     if (node->left)
@@ -25,8 +25,8 @@ namespace simplify {
   }
 
   void simplifyBinaryOp(unique_ptr<Node> &node){
-    if (isNum(node->left) && isNum(node->right)){
-      node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left), getNum(node->right))))));
+    if (isNum(node->left.get()) && isNum(node->right.get())){
+      node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left.get()), getNum(node->right.get()))))));
       return;
     }
 
@@ -49,12 +49,12 @@ namespace simplify {
   void simplifyPlus(unique_ptr<Node> &node){
     assert(node->token.value == string("+"));
 
-    if (isZero(node->left)){
+    if (isZero(node->left.get())){
       node = move(node->right);
       return;
     }
 
-    if (isZero(node->right)){
+    if (isZero(node->right.get())){
       node = move(node->left);
       return;
     }
@@ -63,17 +63,17 @@ namespace simplify {
   void simplifyMul(unique_ptr<Node> &node){
     assert(node->token.value == string("*"));
 
-    if (isOne(node->left)){
+    if (isOne(node->left.get())){
       node = move(node->right);
       return;
     }
 
-    if (isOne(node->right)){
+    if (isOne(node->right.get())){
       node = move(node->left);
       return;
     }
 
-    if (isZero(node->right) || isZero(node->left)){
+    if (isZero(node->right.get()) || isZero(node->left.get())){
       node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, string("0"))));
       return;
     }
@@ -82,12 +82,12 @@ namespace simplify {
   void simplifyPow(unique_ptr<Node> &node){
     assert(node->token.value == string("^"));
     assert(node->right->token.type == TOKEN_TYPE::NUM);
-    if (isOne(node->right)){
+    if (isOne(node->right.get())){
       node = move(node->left);
       return;
     }
 
-    if (isZero(node->right)){
+    if (isZero(node->right.get())){
       node = unique_ptr<Node>(new Node(Token(TOKEN_TYPE::NUM, string("1"))));
       return;
     }
