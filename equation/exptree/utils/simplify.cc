@@ -29,7 +29,7 @@ namespace simplify {
 
   void simplifyBinaryOp(u_node &node){
     if (isNum(node->left.get()) && isNum(node->right.get())){
-      node = u_node(new Node(Token(TOKEN_TYPE::NUM, doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left.get()), getNum(node->right.get()))))));
+      node = numNode(doubleToString(EqMaps::bin_maps[node->token.value](getNum(node->left.get()), getNum(node->right.get()))));
       return;
     }
 
@@ -57,7 +57,7 @@ namespace simplify {
 
   void simplifyUnaryOp(u_node &node){
     if (isNum(node->right.get())){
-      node = u_node(new Node(Token(TOKEN_TYPE::NUM, doubleToString(EqMaps::un_maps[node->token.value](getNum(node->right.get()))))));
+      node = numNode(doubleToString(EqMaps::un_maps[node->token.value](getNum(node->right.get()))));
       return;
     }
   }
@@ -90,7 +90,7 @@ namespace simplify {
     }
 
     if (isZero(node->right.get()) || isZero(node->left.get())){
-      node = u_node(new Node(Token(TOKEN_TYPE::NUM, string("0"))));
+      node = numNode(string("0"));
       return;
     }
   }
@@ -104,7 +104,7 @@ namespace simplify {
     }
 
     if (isZero(node->right.get())){
-      node = u_node(new Node(Token(TOKEN_TYPE::NUM, string("1"))));
+      node = numNode(string("1"));
       return;
     }
   }

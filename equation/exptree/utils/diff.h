@@ -21,8 +21,6 @@ namespace diff {
   u_node diffExp(Node const *node);
   u_node diffCos(Node const *node);
   u_node diffLog(Node const *node);
-
-  u_node numNode(std::string &&  str);
 }
 
 
