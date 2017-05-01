@@ -19,36 +19,19 @@ struct OpInfo{
   char ass;
 };
 
-inline bool isNumeric(char a){
-  return  (a >= '0') && (a <= '9');
-}
 
-inline bool isLetter(char a){
-  return (a >= 'a') && (a <= 'z');
-}
-
-inline bool isSimpleOP(char a, Parser::MODE last_mode){
+Parser::MODE Parser::getMode(char a, Parser::MODE last_mode){
   return
-        ( (last_mode != Parser::MODE::UNARY_MINUS)     &&
-          (last_mode != Parser::MODE::UNARY_OPERATOR)  &&
-          (last_mode != Parser::MODE::BINARY_OPERATOR) &&
-          (last_mode != Parser::MODE::START)  )
-    &&  ( (a == '+') ||
-          (a == '-') || // This is a binary minus if we reach here
-          (a == '*') ||
-          (a == '/') ||
-          (a == '^') );
+    is_unary_minus(a, last_mode)  ? Parser::MODE::UNARY_MINUS     :
+    isNumeric(a)                  ? Parser::MODE::NUMERIC         :
+    isLetter(a)                   ? Parser::MODE::LETTER          :
+    isSimpleOP(a, last_mode)      ? Parser::MODE::BINARY_OPERATOR :
+    isOpenBracket(a)              ? Parser::MODE::OPEN_BRACKET    :
+    isCloseBracket(a)             ? Parser::MODE::CLOSE_BRACKET   :
+    Parser::MODE::ERROR;
 }
 
-inline bool isOpenBracket(char a){
-  return (a == '(');
-}
-
-inline bool isCloseBracket(char a){
-  return (a == ')');
-}
-
-TOKEN_TYPE getTokenType(string *str){
+TOKEN_TYPE Parser::getTokenType(std::string *str){
   if (
     *str == string("sin") ||
     *str == string("cos") ||
@@ -65,25 +48,7 @@ TOKEN_TYPE getTokenType(string *str){
     return TOKEN_TYPE::VAR;
 }
 
-inline bool is_unary_minus(char a, Parser::MODE last_mode){
-  return (a == '-')                                   &&
-         ( (last_mode == Parser::MODE::START)         ||
-           (last_mode == Parser::MODE::CLOSE_BRACKET) ||
-           (last_mode == Parser::MODE::OPEN_BRACKET) );
-}
-
-Parser::MODE Parser::getMode(char a, Parser::MODE last_mode){
-  return
-    is_unary_minus(a, last_mode)  ? Parser::MODE::UNARY_MINUS  :
-    isNumeric(a)                  ? Parser::MODE::NUMERIC         :
-    isLetter(a)                   ? Parser::MODE::LETTER          :
-    isSimpleOP(a, last_mode)      ? Parser::MODE::BINARY_OPERATOR :
-    isOpenBracket(a)              ? Parser::MODE::OPEN_BRACKET    :
-    isCloseBracket(a)             ? Parser::MODE::CLOSE_BRACKET   :
-    Parser::MODE::ERROR;
-}
-
-bool readNum(
+bool Parser::readNum(
               string *input,
               size_t &str_position,
               Parser::MODE &mode,
@@ -110,7 +75,7 @@ bool readNum(
   return true;
 }
 
-bool readWord(
+bool Parser::readWord(
                 string *input,
                 size_t &str_position,
                 Parser::MODE &mode,
