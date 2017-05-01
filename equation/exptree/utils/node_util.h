@@ -22,4 +22,13 @@ namespace node_util {
   std::string doubleToString(double a);
 }
 
+
+namespace node_util {
+  bool inline isZero(Node const *node){ return (node->token.type == TOKEN_TYPE::NUM && node->token.value == std::string("0"));  }
+  bool inline isOne(Node const *node){ return (node->token.type == TOKEN_TYPE::NUM && node->token.value == std::string("1"));  }
+  bool inline isVar(Node const *node){ return node->token.type == TOKEN_TYPE::VAR;  }
+  bool inline isNum(Node const *node){ return node->token.type == TOKEN_TYPE::NUM;  }
+  bool inline isTerminalNum(Node const *node){ return (not (node->left || node->right) && node->token.type == TOKEN_TYPE::NUM);  }
+  double inline getNum(Node const *node){ return std::stod(node->token.value);  }
+}
 #endif

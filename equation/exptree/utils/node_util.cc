@@ -43,29 +43,6 @@ namespace node_util{
     return new_node;
   }
 
-  bool isZero(Node const *node){
-    return (node->token.type == TOKEN_TYPE::NUM && node->token.value == string("0"));
-  }
-
-  bool isOne(Node const *node){
-    return (node->token.type == TOKEN_TYPE::NUM && node->token.value == string("1"));
-  }
-
-  bool isVar(Node const *node){
-    return node->token.type == TOKEN_TYPE::VAR;
-  }
-
-  bool isNum(Node const *node){
-    return node->token.type == TOKEN_TYPE::NUM;
-  }
-
-  bool isTerminalNum(Node const *node){
-    return (not (node->left || node->right) && node->token.type == TOKEN_TYPE::NUM);
-  }
-
-  double getNum(Node const *node){
-    return stod(node->token.value);
-  }
 
   string doubleToString(double a){
     ostringstream ostr;
